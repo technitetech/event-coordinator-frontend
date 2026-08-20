@@ -3,11 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Frond from "../../components/Frond";
-import { createReservation } from "./actions";
-
-// The rule engine lives in the Flask backend. Set NEXT_PUBLIC_API_URL if it
-// runs somewhere other than the default.
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+import { createReservation, getEstimate } from "./actions";
+import DesignGeneratorPopup from "../../components/DesignGeneratorPopup";
 
 const EVENT_TYPES = [
   { value: "wedding", label: "Wedding" },
@@ -38,27 +35,38 @@ export default function EventPlanner({ loggedIn, customerName }) {
 
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
-  // --- Plan: call the Flask rule engine (must be running on port 5000) ---
+  const [showPopup, setShowPopup] = useState(false);
+  const [generatedImages, setGeneratedImages] = useState([]);
+
+  const handlePlanClick = () => {
+    if (!loggedIn) {
+      setError("Please log in to plan an event and generate designs.");
+      return;
+    }
+    setShowPopup(true);
+  };
+
+  const handleGenerate = (urls) => {
+    setGeneratedImages(Array.isArray(urls) ? urls : [urls]);
+    plan();
+  };
+
+  // --- Plan: call the Next.js Server Action rule engine ---
   const plan = async () => {
     setLoading(true); setError(null); setResult(null);
     setReserved(false); setReserveError(null);
     try {
-      const res = await fetch(`${API}/api/recommend`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          event_type: form.event_type,
-          theme: form.theme,
-          guests: Number(form.guests),
-          budget: Number(form.budget),
-          event_date: form.event_date || undefined,
-        }),
+      const data = await getEstimate({
+        event_type: form.event_type,
+        theme: form.theme,
+        guests: Number(form.guests),
+        budget: Number(form.budget),
+        event_date: form.event_date || undefined,
       });
-      const data = await res.json();
       if (data.error) setError(data.error);
       else setResult(data);
     } catch (e) {
-      setError("Couldn't reach the coordinator service. Make sure the Flask backend is running on port 5000.");
+      setError("An unexpected error occurred while generating the estimate.");
     } finally {
       setLoading(false);
     }
@@ -78,6 +86,7 @@ export default function EventPlanner({ loggedIn, customerName }) {
         venue_name: result.venue.name,
         menu_name: result.menu.name,
         decoration_name: result.decoration.name,
+        image_url: JSON.stringify(generatedImages),
       };
       const res = await createReservation(payload);
       if (res.ok) setReserved(true);
@@ -98,6 +107,13 @@ export default function EventPlanner({ loggedIn, customerName }) {
           <p>Tell us about your event and the coordinator will recommend a venue, menu, and décor to suit your guest count and budget — then reserve it in a click.</p>
         </div>
       </section>
+
+      {showPopup && (
+        <DesignGeneratorPopup 
+          onClose={() => setShowPopup(false)} 
+          onGenerate={handleGenerate} 
+        />
+      )}
 
       <section className="tool-body">
         <div className="wrap tool-grid">
@@ -130,7 +146,7 @@ export default function EventPlanner({ loggedIn, customerName }) {
                 <input id="event_date" type="date" value={form.event_date} onChange={update("event_date")} />
               </div>
             </div>
-            <button className="btn btn-solid" onClick={plan} disabled={loading}>
+            <button className="btn btn-solid" onClick={handlePlanClick} disabled={loading}>
               {loading ? "Planning…" : "Plan my event"}
             </button>
             {error && <div className="err">{error}</div>}
@@ -145,8 +161,38 @@ export default function EventPlanner({ loggedIn, customerName }) {
               </div>
             )}
 
-            {result && (
+            {loading && (
+              <div className="empty-state" style={{ padding: '60px 40px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+                  <svg style={{ animation: 'spin 1.5s linear infinite', height: '40px', width: '40px', color: 'var(--emerald)' }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <div>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: 'var(--emerald)', marginBottom: '8px' }}>Generating Your Design</h3>
+                    <p style={{ color: 'var(--mist)', fontSize: '0.95rem' }}>Our AI is creating 4 unique concepts based on your choices. This may take a few moments...</p>
+                  </div>
+                  <div style={{ width: '100%', maxWidth: '200px', height: '4px', background: 'var(--line)', borderRadius: '2px', overflow: 'hidden', marginTop: '10px' }}>
+                    <div style={{ width: '100%', height: '100%', background: 'var(--emerald)', animation: 'progress-indeterminate 1.5s infinite linear', transformOrigin: '0% 50%' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {result && !loading && (
               <div className="slip">
+                {generatedImages.length > 0 && (
+                  <div className="mb-6">
+                    <div style={{ display: 'flex', overflowX: 'auto', gap: '12px', paddingBottom: '10px' }}>
+                      {generatedImages.map((img, i) => (
+                        <img 
+                          key={i} 
+                          src={img} 
+                          alt={`AI Generated Design ${i+1}`} 
+                          style={{ width: '280px', height: '280px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} 
+                        />
+                      ))}
+                    </div>
+                    <p className="text-xs text-stone-500 mt-2 italic text-center">Swipe to see different angles (AI generated concepts)</p>
+                  </div>
+                )}
                 <div className="slip-head">
                   <h3>Your estimate</h3>
                   <span className={`verdict ${result.within_budget ? "ok" : "over"}`}>

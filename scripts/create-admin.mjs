@@ -72,6 +72,6 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error("\n✗ Failed:", e.message);
+  console.error("\n✗ Failed:", e);
   process.exit(1);
 });
