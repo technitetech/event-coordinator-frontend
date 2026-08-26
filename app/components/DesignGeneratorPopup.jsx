@@ -15,16 +15,23 @@ const OPTIONS = {
   entranceDecor: ["Floral Arch", "Red Carpet", "Lantern Pathway", "Signage", "Welcome Drink Station"]
 };
 
-export default function DesignGeneratorPopup({ onClose, onGenerate }) {
+export default function DesignGeneratorPopup({ onClose, onGenerate, eventContext = {} }) {
+  const {
+    eventType = "wedding",
+    venueName = "Crystal Ballroom",
+    theme = "floral",
+    guests = 100,
+  } = eventContext;
+
   const [answers, setAnswers] = useState({
-    colorPalette: "Pastel",
-    lightingStyle: "Fairy Lights",
-    seatingArrangement: "Round Tables",
-    centerpieceType: "Tall Floral",
-    floralArrangement: "Roses",
+    colorPalette: theme === "tropical" ? "Vibrant" : theme === "classic" ? "Jewel Tones" : "Pastel",
+    lightingStyle: eventType === "wedding" ? "Chandeliers" : "Fairy Lights",
+    seatingArrangement: eventType === "conference" ? "U-Shape" : "Round Tables",
+    centerpieceType: theme === "modern" ? "Geometric" : "Tall Floral",
+    floralArrangement: theme === "tropical" ? "Tropical" : "Roses",
     tableclothMaterial: "Satin",
     flooring: "White Seamless",
-    backdropStyle: "Floral Wall",
+    backdropStyle: theme === "tropical" ? "Greenery" : "Floral Wall",
     ceilingDraping: "Starburst",
     entranceDecor: "Floral Arch",
     specialNotes: ""
@@ -42,24 +49,31 @@ export default function DesignGeneratorPopup({ onClose, onGenerate }) {
     setGenerating(true);
     setError(null);
     
-    const prompt = `A highly detailed, realistic rendering of a wedding hall interior design. 
+    const prompt = `A highly detailed, photorealistic interior architectural render of ${venueName} at St. Lachland luxury hotel tailored for a ${eventType} with ${guests} guests.
+    Theme: ${theme}
     Color Palette: ${answers.colorPalette}
     Lighting Style: ${answers.lightingStyle}
     Seating Arrangement: ${answers.seatingArrangement}
     Centerpiece Type: ${answers.centerpieceType}
     Floral Arrangement: ${answers.floralArrangement}
     Tablecloth Material: ${answers.tableclothMaterial}
-    Flooring/Dancefloor: ${answers.flooring}
+    Flooring / Dancefloor: ${answers.flooring}
     Backdrop Style: ${answers.backdropStyle}
     Ceiling Draping: ${answers.ceilingDraping}
     Entrance Decor: ${answers.entranceDecor}
-    Special Notes: ${answers.specialNotes}`;
+    Special Notes: ${answers.specialNotes || "Luxury editorial aesthetic, warm atmospheric lighting, cinematic framing"}`;
 
     try {
       const res = await fetch("/api/generate-design", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ 
+          prompt,
+          venueName,
+          eventType,
+          theme,
+          guests
+        })
       });
       
       const data = await res.json();
@@ -68,13 +82,14 @@ export default function DesignGeneratorPopup({ onClose, onGenerate }) {
         throw new Error(data.error || "Failed to generate design");
       }
       
-      // data.data is OpenAI format for image generation response (data.data[0].url)
-      const imageUrl = data.data && data.data.length > 0 ? data.data[0].url : null;
-      if (!imageUrl) {
-        throw new Error("No image URL returned from API");
+      const urls = Array.isArray(data?.data)
+        ? data.data.map((d) => d?.url).filter(Boolean)
+        : [];
+      if (urls.length === 0) {
+        throw new Error("No image URLs returned from API");
       }
-      
-      onGenerate(imageUrl);
+
+      onGenerate(urls);
       onClose();
     } catch (err) {
       setError(err.message);
@@ -86,12 +101,15 @@ export default function DesignGeneratorPopup({ onClose, onGenerate }) {
     <div className="dg-modal-overlay">
       <div className="dg-modal">
         <div className="dg-modal-header">
-          <h2>Design Your Wedding Hall</h2>
-          <button onClick={onClose} className="dg-modal-close">&times;</button>
+          <div>
+            <h2>AI Event Concept Visualizer</h2>
+            <span className="text-xs text-stone-400">Venue context: {venueName} · {eventType.toUpperCase()} ({theme})</span>
+          </div>
+          <button onClick={onClose} className="dg-modal-close" aria-label="Close modal">&times;</button>
         </div>
         
         <div className="dg-modal-body">
-          <p>Answer a few quick questions to customize your hall's decoration. Our AI will generate a unique visual design based on your preferences!</p>
+          <p>Customize aesthetic parameters for <strong>{venueName}</strong>. Our multimodal AI generator creates 4 synchronized architectural perspectives adhering to your constraints.</p>
           
           {error && (
             <div className="dg-error">
@@ -118,13 +136,13 @@ export default function DesignGeneratorPopup({ onClose, onGenerate }) {
             </div>
             
             <div className="dg-field dg-field-full">
-              <label>Special Notes</label>
+              <label>Special Instructions & Architectural Notes</label>
               <textarea 
                 name="specialNotes"
                 value={answers.specialNotes}
                 onChange={handleChange}
-                placeholder="Any specific instructions or themes you want to include..."
-                rows={3}
+                placeholder="E.g., Ceylon tea garden view backdrop, candlelit aisle, gold Chiavari chairs..."
+                rows={2}
               ></textarea>
             </div>
           </form>
@@ -148,9 +166,9 @@ export default function DesignGeneratorPopup({ onClose, onGenerate }) {
             {generating ? (
               <>
                 <svg style={{ animation: 'spin 1s linear infinite', height: '20px', width: '20px', color: 'white' }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                Generating...
+                Synthesizing Concept Perspectives...
               </>
-            ) : "Generate & Plan"}
+            ) : "Synthesize AI Visuals"}
           </button>
         </div>
       </div>

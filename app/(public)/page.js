@@ -1,263 +1,600 @@
 import Link from "next/link";
+import Image from "next/image";
 import Reveal from "../components/Reveal.jsx";
 import Frond from "../components/Frond.jsx";
+import HeroSearch from "../components/HeroSearch.jsx";
+import VenueCarousel from "../components/VenueCarousel.jsx";
+import TestimonialCarousel from "../components/TestimonialCarousel.jsx";
+import CountUp from "../components/CountUp.jsx";
+import { 
+  Waves, Sparkles, Utensils, Martini, Wifi, Car,
+  Diamond, Users, Cake, Wine,
+  Zap, BarChart3, CloudRain, Palette,
+  Headset, FileEdit, PenTool, CalendarCheck, Heart,
+  PartyPopper, BedDouble, Smile, Trophy,
+  Plus, Play, ArrowRight,
+  ShieldCheck, CheckCircle2, Lock,
+  Mail
+} from "lucide-react";
 
-const ROOMS = [
-  { kicker: "Garden wing", name: "Garden Suite", img: "img-a",
-    desc: "A serene suite opening onto the tea gardens, with a private veranda and clawfoot bath.",
-    price: "48,000" },
-  { kicker: "Heritage wing", name: "Colonial Villa", img: "img-f",
-    desc: "Restored 1920s villa with a fireplace, four-poster bed, and butler service on call.",
-    price: "72,000" },
-  { kicker: "Estate loft", name: "Tea-Estate Loft", img: "img-d",
-    desc: "A light-filled loft above the estate, framing uninterrupted views of the misted hills.",
-    price: "56,000" },
+/* ------------------------------------------------------------------ */
+/*  DATA                                                               */
+/* ------------------------------------------------------------------ */
+
+const POPULAR_VENUES = [
+  {
+    name: "Crystal Ballroom",
+    img: "/images/venue-ballroom.jpg",
+    caption: "St. Lachland Estate",
+    capacity: "51–150 guests",
+    price: "60,000",
+    badge: "Bestseller",
+    rating: "4.9",
+  },
+  {
+    name: "Garden Terrace",
+    img: "/images/venue-garden.jpg",
+    caption: "St. Lachland Estate",
+    capacity: "10–50 guests",
+    price: "25,000",
+    badge: "Popular",
+    rating: "4.8",
+  },
+  {
+    name: "Grand Hall",
+    img: "/images/venue-grand-hall.jpg",
+    caption: "St. Lachland Estate",
+    capacity: "151–300 guests",
+    price: "120,000",
+    badge: "Luxury",
+    rating: "4.9",
+  },
+  {
+    name: "The Conservatory",
+    img: "/images/venue-dining.jpg",
+    caption: "St. Lachland Estate",
+    capacity: "Private dining",
+    price: "48,000",
+    badge: "Exclusive",
+    rating: "4.7",
+  },
+  {
+    name: "The Spa Pavilion",
+    img: "/images/venue-spa.jpg",
+    caption: "St. Lachland Estate",
+    capacity: "Couples & groups",
+    price: "35,000",
+    badge: "Popular",
+    rating: "4.8",
+  },
 ];
 
-const VENUES = [
-  { name: "The Conservatory", desc: "Ceylon-inspired fine dining under glass" },
-  { name: "High Tea Lawn", desc: "Afternoon tea on the colonial lawn" },
-  { name: "Cellar & Bar", desc: "Estate spirits and rare Ceylon teas" },
+const AMENITIES = [
+  { icon: Waves, label: "Infinity Pool" },
+  { icon: Sparkles, label: "Wellness & Spa" },
+  { icon: Utensils, label: "Fine Dining" },
+  { icon: Martini, label: "Cocktail Bar" },
+  { icon: Wifi, label: "Free Wi-Fi" },
+  { icon: Car, label: "Valet Parking" },
 ];
 
-const EXPERIENCES = [
-  { name: "Estate High Tea", desc: "A curated tasting of single-estate Ceylon teas with the head planter." },
-  { name: "Lake & Boathouse", desc: "Private rowing and sunrise breakfasts on Lake Gregory." },
-  { name: "Cloud-Forest Trails", desc: "Guided treks through Horton Plains and the surrounding highlands." },
-  { name: "The Spa at Lachland", desc: "Ayurvedic rituals drawing on local herbs and warm stone." },
-  { name: "Planter's Table", desc: "A chef's-garden dinner sourced entirely from the estate." },
-  { name: "Vintage Motoring", desc: "Tour the hill country in a restored classic car with a driver." },
+const EVENT_TYPES = [
+  {
+    icon: Diamond,
+    name: "Weddings",
+    desc: "From intimate vows to grand celebrations on the estate.",
+    img: "/images/venue-ballroom.jpg",
+  },
+  {
+    icon: Users,
+    name: "Conferences",
+    desc: "Professional setups with AV, catering and hill-country calm.",
+    img: "/images/venue-grand-hall.jpg",
+  },
+  {
+    icon: Cake,
+    name: "Birthdays",
+    desc: "Themed parties with entertainment, décor and bespoke menus.",
+    img: "/images/venue-garden.jpg",
+  },
+  {
+    icon: Wine,
+    name: "Gala Dinners",
+    desc: "Fine-dining set menus with mixology and live music.",
+    img: "/images/venue-dining.jpg",
+  },
 ];
 
 const FEATURES = [
-  { n: "01", h: "Instant venue match", p: "Enter guests and budget — the coordinator matches the right hall or lawn from our live availability." },
-  { n: "02", h: "Transparent estimate", p: "An itemised cost for venue, menu, and décor, with a clear within-budget verdict." },
-  { n: "03", h: "Seasonal intelligence", p: "It flags monsoon dates, moves outdoor plans indoors, and warns of clashes automatically." },
+  {
+    icon: Zap,
+    title: "Instant venue match",
+    desc: "Enter guests and budget — the coordinator matches the right hall or lawn from our live availability.",
+  },
+  {
+    icon: BarChart3,
+    title: "Transparent estimate",
+    desc: "An itemised cost for venue, menu, and décor, with a clear within-budget verdict.",
+  },
+  {
+    icon: CloudRain,
+    title: "Seasonal intelligence",
+    desc: "Flags monsoon dates, moves outdoor plans indoors, and warns of clashes automatically.",
+  },
+  {
+    icon: Palette,
+    title: "AI design generation",
+    desc: "Get AI-generated visual concepts for your event décor, floral arrangements, and table settings.",
+  },
 ];
 
-const GALLERY = [
-  { c: "img-a", cls: "tall" }, { c: "img-c", cls: "" }, { c: "img-d", cls: "" },
-  { c: "img-e", cls: "wide" }, { c: "img-f", cls: "" }, { c: "img-b", cls: "" },
+const PROCESS_STEPS = [
+  {
+    step: "01",
+    icon: Headset,
+    title: "Consultation",
+    desc: "Share your vision, preferences, and budget with our team.",
+  },
+  {
+    step: "02",
+    icon: FileEdit,
+    title: "Planning",
+    desc: "We craft a detailed event plan tailored to your requirements.",
+  },
+  {
+    step: "03",
+    icon: PenTool,
+    title: "Design",
+    desc: "Our AI generates décor concepts and venue arrangements.",
+  },
+  {
+    step: "04",
+    icon: CalendarCheck,
+    title: "Execution",
+    desc: "We coordinate every detail for a flawless celebration.",
+  },
+  {
+    step: "05",
+    icon: Heart,
+    title: "Memories",
+    desc: "Sit back and enjoy — we handle the rest for you.",
+  },
 ];
+
+const TESTIMONIALS = [
+  {
+    name: "Aisha & Ravi",
+    event: "Wedding · 2024",
+    text: "We married on the lawn in the mist and it was the most beautiful day of our lives. The estate thought of everything before we could ask.",
+    avatar: "AR",
+  },
+  {
+    name: "Priya Fernando",
+    event: "Birthday · 2025",
+    text: "The AI coordinator nailed our budget perfectly. The decoration tier recommendation saved us hours of planning.",
+    avatar: "PF",
+  },
+  {
+    name: "James & Co.",
+    event: "Conference · 2025",
+    text: "Exceptional venue. The rainy-season swap to the Grand Hall was seamless and our delegates were impressed.",
+    avatar: "JC",
+  },
+  {
+    name: "Dilshan Perera",
+    event: "Gala Dinner · 2024",
+    text: "The fine dining experience was unparalleled. The hill-country setting added a magical touch to our corporate gala.",
+    avatar: "DP",
+  },
+];
+
+const STATS = [
+  { value: 500, suffix: "+", label: "Events hosted", icon: PartyPopper },
+  { value: 42, suffix: "", label: "Luxury rooms", icon: BedDouble },
+  { value: 98, suffix: "%", label: "Happy clients", icon: Smile },
+  { value: 5, suffix: "", label: "Award-winning venues", icon: Trophy },
+];
+
+/* ------------------------------------------------------------------ */
+/*  PAGE COMPONENT                                                     */
+/* ------------------------------------------------------------------ */
 
 export default function Home() {
   return (
     <main>
-      {/* ---------- HERO ---------- */}
-      <header className="hero">
-        <div className="hero-frond"><Frond stroke="#d6bb6e" /></div>
+      {/* ========== HERO ========== */}
+      <header className="hero" id="hero-section">
+        <div className="hero-bg">
+          <Image
+            src="/images/hero-bg.jpg"
+            alt="St. Lachland Hotel overlooking tea gardens"
+            fill
+            priority
+            fetchPriority="high"
+            sizes="100vw"
+            quality={75}
+            style={{ objectFit: "cover", objectPosition: "center 30%" }}
+          />
+        </div>
+        <div className="hero-overlay" />
+        <div className="hero-particles" aria-hidden="true">
+          <span className="particle p1" />
+          <span className="particle p2" />
+          <span className="particle p3" />
+          <span className="particle p4" />
+          <span className="particle p5" />
+        </div>
+
         <div className="wrap">
           <div className="hero-content">
             <Reveal>
-              <span className="eyebrow">Nuwara Eliya · Sri Lanka</span>
+              <span className="hero-badge">
+                <span className="hero-badge-dot" />
+                Hill-Country Luxury · Sri Lanka
+              </span>
             </Reveal>
             <Reveal delay={120}>
-              <h1 className="display">Where the hills<br />keep their secrets.</h1>
+              <h1 className="hero-title">
+                Plan your dream{" "}
+                <span className="hero-accent">Event</span>
+                <br />
+                at St. Lachland Hotel
+              </h1>
             </Reveal>
             <Reveal delay={240}>
-              <p className="sub">
-                A colonial-era estate reborn as a hill-country retreat — misted tea
-                gardens, quiet luxury, and celebrations worth the journey.
+              <p className="hero-subtitle">
+                A colonial-era estate reborn as a celebration destination — let
+                our AI coordinator plan your perfect event with the ideal venue,
+                menu, and décor, all within your budget.
               </p>
             </Reveal>
             <Reveal delay={360}>
               <div className="hero-actions">
-                <Link href="/events" className="btn btn-gold">Plan an event</Link>
-                <a href="/#stay" className="btn btn-light">Explore the estate</a>
+                <Link href="/events" className="btn-hero-primary" id="hero-plan-btn">
+                  <Plus size={18} strokeWidth={2} />
+                  Plan an event
+                </Link>
+                <a href="#venues" className="btn-hero-outline" id="hero-explore-btn">
+                  <Play size={18} fill="currentColor" strokeWidth={0} />
+                  Explore venues
+                </a>
               </div>
             </Reveal>
           </div>
         </div>
-        <div className="scroll-cue"><span>Scroll</span><span className="bar" /></div>
+
+        {/* Floating search bar — inspired by reference designs */}
+        <div className="hero-search-wrapper">
+          <div className="wrap">
+            <Reveal delay={480}>
+              <HeroSearch />
+            </Reveal>
+          </div>
+        </div>
+
+        <div className="scroll-cue">
+          <span>Scroll</span>
+          <span className="bar" />
+        </div>
       </header>
 
-      {/* ---------- WELCOME ---------- */}
-      <section className="section">
-        <div className="wrap welcome-grid">
-          <Reveal className="welcome-copy">
-            <span className="eyebrow">A century in the hills</span>
-            <h2 className="display">An estate that has always known how to host.</h2>
+      {/* ========== AMENITIES STRIP ========== */}
+      <section className="amenities-strip">
+        <div className="wrap">
+          <span className="amenities-eyebrow">Estate Facilities</span>
+          <div className="amenities-grid">
+            {AMENITIES.map((a) => {
+              const IconComp = a.icon;
+              return (
+                <div key={a.label} className="amenity-item">
+                  <div className="amenity-icon-circle">
+                    <IconComp size={26} strokeWidth={1.5} />
+                  </div>
+                  <span className="amenity-label">{a.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ========== STATS BANNER ========== */}
+      <section className="stats-banner">
+        <div className="wrap">
+          <span className="stats-eyebrow">St. Lachland by the numbers</span>
+          <div className="stats-grid">
+            {STATS.map((s) => {
+              const IconComp = s.icon;
+              return (
+                <div key={s.label} className="stat-item">
+                  <div className="stat-icon-wrap">
+                    <IconComp size={22} strokeWidth={1.5} />
+                  </div>
+                  <span className="stat-number">
+                    <CountUp end={s.value} suffix={s.suffix} />
+                  </span>
+                  <div className="stat-divider" />
+                  <span className="stat-name">{s.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+
+      {/* ========== POPULAR VENUES — inspired by Luxury Resort / Travel Booking ========== */}
+      <section className="section venues-section" id="venues">
+        <div className="wrap">
+          <Reveal>
+            <div className="section-header">
+              <div>
+                <span className="eyebrow">Our Venues</span>
+                <h2 className="display">
+                  Popular Event Venues
+                </h2>
+              </div>
+              <Link href="/events" className="view-all-link">
+                View all venues <ArrowRight size={16} strokeWidth={2} />
+              </Link>
+            </div>
+          </Reveal>
+          <VenueCarousel venues={POPULAR_VENUES} />
+        </div>
+      </section>
+
+      {/* ========== EVENT TYPES — inspired by Eloraharbor / Norvyn ========== */}
+      <section className="section event-types-section" id="events-section">
+        <div className="wrap">
+          <Reveal className="section-head">
+            <span className="eyebrow">What we do</span>
+            <h2 className="display">Events we specialise in</h2>
             <p>
-              Set among working tea gardens at 1,900 metres, St. Lachland began as a
-              planter's residence in 1904. Today it keeps the same unhurried grace —
-              wood fires, long verandas, and mornings that arrive wrapped in cloud.
-            </p>
-            <p>
-              Forty-two rooms, three dining rooms, and grounds made for gathering.
-              Whatever the occasion, the estate rises to it.
+              From intimate garden gatherings to grand ballroom galas, the estate
+              rises to every occasion.
             </p>
           </Reveal>
-          <Reveal delay={150}>
-            <div className="welcome-panel">
-              <div className="frond-deco"><Frond stroke="#d6bb6e" /></div>
-              <div className="panel-tag">
-                <div className="num">1904</div>
-                <div className="lbl">Est. in the highlands</div>
+          <div className="event-type-grid">
+            {EVENT_TYPES.map((et, i) => {
+              const IconComp = et.icon;
+              return (
+                <Reveal key={et.name} delay={i * 100}>
+                  <Link href="/events" className="event-type-card">
+                    <div className="event-type-img">
+                      <Image
+                        src={et.img}
+                        alt={et.name}
+                        fill
+                        sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 300px"
+                        quality={70}
+                        style={{ objectFit: "cover" }}
+                      />
+                      <div className="event-type-overlay" />
+                      <span className="event-type-icon-circle">
+                        <IconComp size={24} strokeWidth={1.5} />
+                      </span>
+                    </div>
+                    <div className="event-type-body">
+                      <h3>{et.name}</h3>
+                      <p>{et.desc}</p>
+                      <span className="event-type-link">
+                        Plan now <ArrowRight size={16} strokeWidth={2} />
+                      </span>
+                    </div>
+                  </Link>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ========== OUR APPROACH — inspired by Norvyn Events / Eloraharbor ========== */}
+      <section className="section process-section" id="process">
+        <div className="wrap">
+          <Reveal>
+            <div className="section-head" style={{ textAlign: "center" }}>
+              <span className="eyebrow">Our Approach</span>
+              <h2 className="display">How We Bring Your Vision to Life</h2>
+              <p>A seamless five-step process from first consultation to your perfect celebration.</p>
+            </div>
+          </Reveal>
+          <div className="process-grid">
+            {PROCESS_STEPS.map((s, i) => {
+              const IconComp = s.icon;
+              return (
+                <Reveal key={s.step} delay={i * 100}>
+                  <div className="process-item">
+                    <div className="process-step-num">{s.step}</div>
+                    <div className="process-icon-circle">
+                      <IconComp size={28} strokeWidth={1.5} />
+                    </div>
+                    <h4>{s.title}</h4>
+                    <p>{s.desc}</p>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ========== NEED ASSISTANCE — inspired by Travel Booking reference ========== */}
+      <section className="assist-band">
+        <div className="wrap">
+          <Reveal>
+            <div className="assist-card">
+              <div className="assist-main">
+                <span className="assist-kicker">We&rsquo;re here to help</span>
+                <h3 className="display">Need Assistance?</h3>
+                <p>
+                  Our event experts are ready to help you plan your perfect
+                  celebration at the estate.
+                </p>
+                <div className="assist-actions">
+                  <Link href="/events" className="btn btn-gold">
+                    Plan an event
+                  </Link>
+                  <a href="tel:+94520000000" className="assist-phone">
+                    +94 52 000 0000
+                  </a>
+                </div>
+              </div>
+              <div className="assist-features">
+                <div className="assist-feat">
+                  <span className="assist-feat-icon-wrap">
+                    <CheckCircle2 size={24} strokeWidth={1.5} />
+                  </span>
+                  <div>
+                    <strong>Best Price</strong>
+                    <span>We guarantee the best price</span>
+                  </div>
+                </div>
+                <div className="assist-feat">
+                  <span className="assist-feat-icon-wrap">
+                    <Headset size={24} strokeWidth={1.5} />
+                  </span>
+                  <div>
+                    <strong>24/7 Support</strong>
+                    <span>We&rsquo;re here anytime</span>
+                  </div>
+                </div>
+                <div className="assist-feat">
+                  <span className="assist-feat-icon-wrap">
+                    <Lock size={24} strokeWidth={1.5} />
+                  </span>
+                  <div>
+                    <strong>Secure Booking</strong>
+                    <span>Book with confidence</span>
+                  </div>
+                </div>
               </div>
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* ---------- ROOMS ---------- */}
-      <section className="section rooms" id="stay">
-        <div className="wrap">
-          <Reveal className="section-head">
-            <span className="eyebrow">Accommodation</span>
-            <h2 className="display">Rooms with a view of the weather.</h2>
-            <p>Each room is its own retreat — restored with care, warmed against the highland chill.</p>
-          </Reveal>
-          <div className="room-grid">
-            {ROOMS.map((r, i) => (
-              <Reveal key={r.name} delay={i * 120}>
-                <article className="room-card">
-                  <div className={`room-img ${r.img}`}>
-                    <div className="frond-deco"><Frond stroke="#ffffff" /></div>
-                  </div>
-                  <div className="room-body">
-                    <span className="kicker">{r.kicker}</span>
-                    <h3 className="display">{r.name}</h3>
-                    <p>{r.desc}</p>
-                    <div className="room-foot">
-                      <span className="room-price">LKR {r.price} <span>/ night</span></span>
-                      <Link href="/events" className="room-link">Enquire</Link>
-                    </div>
-                  </div>
-                </article>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- DINING ---------- */}
-      <section className="section dining" id="dining">
-        <div className="wrap dining-grid">
-          <Reveal>
-            <span className="eyebrow">Dining</span>
-            <h2 className="display">Grown on the estate,<br />served by the fire.</h2>
-            <p>
-              Our kitchens cook from the estate's own gardens and the day's best
-              highland produce — Ceylon classics reimagined, and afternoon tea taken
-              as seriously as it deserves.
-            </p>
-          </Reveal>
-          <Reveal delay={150}>
-            <ul className="venue-list">
-              {VENUES.map((v) => (
-                <li key={v.name}>
-                  <span className="venue-name">{v.name}</span>
-                  <span className="venue-desc">{v.desc}</span>
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ---------- EXPERIENCES ---------- */}
-      <section className="section" id="experiences">
-        <div className="wrap">
-          <Reveal className="section-head">
-            <span className="eyebrow">Experiences</span>
-            <h2 className="display">Reasons to leave your veranda.</h2>
-          </Reveal>
-          <div className="exp-grid">
-            {EXPERIENCES.map((e, i) => (
-              <Reveal key={e.name} delay={(i % 3) * 100}>
-                <div className="exp-cell">
-                  <div className="exp-icon">
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-                      <path d="M12 3v18M5 8c3 0 4 2 7 2s4-2 7-2" strokeLinecap="round" />
-                    </svg>
-                  </div>
-                  <h3>{e.name}</h3>
-                  <p>{e.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- EVENT COORDINATOR (signature feature) ---------- */}
-      <section className="section coord">
+      {/* ========== AI COORDINATOR FEATURE ========== */}
+      <section className="section coord" id="coordinator">
         <div className="wrap">
           <Reveal>
             <div className="coord-card">
-              <div className="coord-frond"><Frond stroke="#d6bb6e" /></div>
+              <div className="coord-frond">
+                <Frond stroke="#d6bb6e" />
+              </div>
               <div className="coord-copy">
-                <span className="eyebrow">Featured · AI Event Coordinator</span>
-                <h2 className="display">Plan your event in a moment, not a month.</h2>
+                <span className="eyebrow">
+                  Featured · AI Event Coordinator
+                </span>
+                <h2 className="display">
+                  Plan your event in a moment, not a month.
+                </h2>
                 <p>
                   Weddings, conferences, and celebrations on the estate — our
-                  coordinator recommends the venue, menu, and décor for your party
-                  and budget, and prices it instantly.
+                  coordinator recommends the venue, menu, and décor for your
+                  party and budget, and prices it instantly.
                 </p>
-                <Link href="/events" className="btn btn-gold">Open the coordinator</Link>
+                <Link href="/events" className="btn btn-gold">
+                  <Sparkles size={18} strokeWidth={2} />
+                  Open the coordinator
+                </Link>
               </div>
               <div className="coord-features">
-                {FEATURES.map((f) => (
-                  <div className="coord-feat" key={f.n}>
-                    <span className="fn">{f.n}</span>
-                    <div>
-                      <h4>{f.h}</h4>
-                      <p>{f.p}</p>
+                {FEATURES.map((f, i) => {
+                  const IconComp = f.icon;
+                  return (
+                    <div className="coord-feat" key={i}>
+                      <span className="coord-feat-icon">
+                        <IconComp size={24} strokeWidth={1.5} />
+                      </span>
+                      <div>
+                        <h4>{f.title}</h4>
+                        <p>{f.desc}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* ---------- GALLERY ---------- */}
-      <section className="section">
+      {/* ========== TESTIMONIALS — inspired by Luxury Resort / Modern Travel ========== */}
+      <section className="section testimonials-section" id="testimonials">
         <div className="wrap">
-          <Reveal className="section-head">
-            <span className="eyebrow">The estate</span>
-            <h2 className="display">A closer look.</h2>
-          </Reveal>
           <Reveal>
-            <div className="gallery-grid">
-              {GALLERY.map((g, i) => (
-                <div key={i} className={`gtile ${g.c} ${g.cls}`}>
-                  <div className="frond-deco"><Frond stroke="#ffffff" /></div>
-                </div>
-              ))}
+            <div className="section-header">
+              <div>
+                <span className="eyebrow">What our guests say</span>
+                <h2 className="display">
+                  Memories That Last a Lifetime
+                </h2>
+              </div>
+              <Link href="/events" className="view-all-link">
+                View all reviews <ArrowRight size={16} strokeWidth={2} />
+              </Link>
             </div>
           </Reveal>
+          <TestimonialCarousel testimonials={TESTIMONIALS} />
         </div>
       </section>
 
-      {/* ---------- TESTIMONIAL ---------- */}
-      <section className="section">
+      {/* ========== TRUST BADGES — inspired by Modern Travel UI ========== */}
+      <section className="trust-section">
         <div className="wrap">
-          <Reveal className="quote">
-            <div className="mark">&ldquo;</div>
-            <blockquote>
-              We married on the lawn in the mist and it was the most beautiful day of
-              our lives. The estate thought of everything before we could ask.
-            </blockquote>
-            <cite>Aisha &amp; Ravi — Wedding, 2024</cite>
-          </Reveal>
+          <div className="trust-grid">
+            {[
+              { icon: Trophy, title: "Award-Winning Venues", sub: "Top-rated in Sri Lanka" },
+              { icon: ShieldCheck, title: "Best Price Guarantee", sub: "Transparent pricing" },
+              { icon: Smile, title: "Trusted by 500+", sub: "Happy event hosts" },
+              { icon: Lock, title: "Secure Reservations", sub: "100% safe & secure" },
+            ].map((t, i) => {
+              const IconComp = t.icon;
+              return (
+                <Reveal key={t.title} delay={i * 80}>
+                  <div className="trust-item">
+                    <span className="trust-icon-wrap">
+                      <IconComp size={24} strokeWidth={1.5} />
+                    </span>
+                    <div>
+                      <strong>{t.title}</strong>
+                      <span>{t.sub}</span>
+                    </div>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* ---------- FINAL CTA ---------- */}
+      {/* ========== NEWSLETTER CTA ========== */}
       <section className="cta-band">
         <div className="wrap">
           <Reveal>
-            <span className="eyebrow">Your visit begins here</span>
-            <h2 className="display">Come up to the hills.</h2>
-            <p>
-              Reserve a room, book a table, or start planning a celebration — the
-              estate is ready when you are.
-            </p>
-            <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-              <Link href="/events" className="btn btn-gold">Plan an event</Link>
-              <a href="/#stay" className="btn btn-light">Reserve a stay</a>
+            <div className="newsletter-card">
+              <div className="newsletter-icon">
+                <Mail size={48} strokeWidth={1} />
+              </div>
+              <div className="newsletter-copy">
+                <span className="eyebrow" style={{ color: "var(--gold)" }}>
+                  Stay updated
+                </span>
+                <h2 className="display">Subscribe to Our Newsletter</h2>
+                <p>
+                  Get the latest event packages and seasonal offers straight to
+                  your inbox.
+                </p>
+              </div>
+              <div className="newsletter-form">
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  aria-label="Email address"
+                />
+                <button className="btn btn-gold">Subscribe</button>
+              </div>
             </div>
           </Reveal>
         </div>

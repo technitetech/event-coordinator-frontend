@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { logout } from "../(public)/auth-actions";
-
-const SECTIONS = [
-  { href: "/#stay", label: "Stay" },
-  { href: "/#dining", label: "Dining" },
-  { href: "/#experiences", label: "Experiences" },
-];
+import { Shield } from "lucide-react";
 
 export default function Nav({ session }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  // Only the homepage has a full-bleed hero behind the nav — every other
+  // page needs the solid nav background from the first frame, otherwise
+  // the transparent nav is unreadable against light page content.
+  const isHome = pathname === "/";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -31,7 +31,7 @@ export default function Nav({ session }) {
   };
 
   return (
-    <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
+    <nav className={`nav ${scrolled || !isHome ? "scrolled" : ""}`}>
       <div className="wrap nav-inner">
         <Link href="/" className="brand" aria-label="St. Lachland Hotel — home">
           <span className="brand-mark">SL</span>
@@ -39,24 +39,46 @@ export default function Nav({ session }) {
         </Link>
 
         <div className={`nav-links ${open ? "open" : ""}`}>
-          {SECTIONS.map((l) => (
-            <a key={l.href} href={l.href} className="nav-link" onClick={() => setOpen(false)}>
-              {l.label}
-            </a>
-          ))}
-          <Link href="/events" className="nav-link" onClick={() => setOpen(false)}>Events</Link>
+          <Link href="/rooms" className="nav-link" onClick={() => setOpen(false)}>
+            Rooms &amp; Suites
+          </Link>
+          <Link href="/dining" className="nav-link" onClick={() => setOpen(false)}>
+            Dining &amp; Tea
+          </Link>
+          <Link href="/events" className="nav-link" onClick={() => setOpen(false)}>
+            AI Events
+          </Link>
+          <a href="/#experiences" className="nav-link" onClick={() => setOpen(false)}>
+            Experiences
+          </a>
 
           {session ? (
             <>
-              <Link href="/account" className="nav-link" onClick={() => setOpen(false)}>
-                {session.name.split(" ")[0]}
+              {session.role === "admin" && (
+                <Link
+                  href="/admin"
+                  className="nav-link text-gold font-bold flex items-center gap-1"
+                  onClick={() => setOpen(false)}
+                >
+                  <Shield size={13} />
+                  <span>Admin Console</span>
+                </Link>
+              )}
+              <Link href="/account" className="nav-link font-semibold" onClick={() => setOpen(false)}>
+                {session.name.split(" ")[0]}&rsquo;s Account
               </Link>
-              <button className="btn btn-gold nav-cta" onClick={doLogout}>Log out</button>
+              <button type="button" className="btn btn-gold nav-cta" onClick={doLogout}>
+                Log out
+              </button>
             </>
           ) : (
             <>
-              <Link href="/login" className="nav-link" onClick={() => setOpen(false)}>Sign in</Link>
-              <Link href="/register" className="btn btn-gold nav-cta" onClick={() => setOpen(false)}>Register</Link>
+              <Link href="/login" className="nav-link" onClick={() => setOpen(false)}>
+                Sign in
+              </Link>
+              <Link href="/register" className="btn btn-gold nav-cta" onClick={() => setOpen(false)}>
+                Register
+              </Link>
             </>
           )}
         </div>

@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import Frond from "../../components/Frond";
-import { createReservation, getEstimate } from "./actions";
+import { createReservation, getHybridEstimate } from "./actions";
 import DesignGeneratorPopup from "../../components/DesignGeneratorPopup";
+import ExplanationPanel from "../../components/ExplanationPanel";
+import { Sparkles, Award, TrendingUp, DollarSign, CheckCircle2, AlertCircle } from "lucide-react";
 
 const EVENT_TYPES = [
   { value: "wedding", label: "Wedding" },
@@ -21,11 +23,24 @@ const THEMES = [
 
 const fmt = (n) => "LKR " + Number(n).toLocaleString();
 
+const PACKAGE_BADGES = {
+  "Best Overall": { icon: Award, color: "#1A3C34", bg: "#EBF2EE" },
+  "Best Quality": { icon: Sparkles, color: "#9A7B4F", bg: "#FBF7F0" },
+  "Best Value": { icon: DollarSign, color: "#2B5E49", bg: "#EDF6F2" },
+};
+
 export default function EventPlanner({ loggedIn, customerName }) {
   const [form, setForm] = useState({
-    event_type: "wedding", guests: 100, budget: 350000, theme: "floral", event_date: "",
+    event_type: "wedding",
+    guests: 100,
+    budget: 350000,
+    theme: "floral",
+    event_date: "",
   });
-  const [result, setResult] = useState(null);
+
+  const [recommendations, setRecommendations] = useState([]);
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -33,48 +48,66 @@ export default function EventPlanner({ loggedIn, customerName }) {
   const [reserved, setReserved] = useState(false);
   const [reserveError, setReserveError] = useState(null);
 
-  const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
-
   const [showPopup, setShowPopup] = useState(false);
   const [generatedImages, setGeneratedImages] = useState([]);
 
-  const handlePlanClick = () => {
-    if (!loggedIn) {
-      setError("Please log in to plan an event and generate designs.");
-      return;
-    }
-    setShowPopup(true);
-  };
+  const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
-  const handleGenerate = (urls) => {
-    setGeneratedImages(Array.isArray(urls) ? urls : [urls]);
-    plan();
-  };
+  // Currently active recommendation
+  const currentPlan = recommendations[selectedIdx] || null;
 
-  // --- Plan: call the Next.js Server Action rule engine ---
-  const plan = async () => {
-    setLoading(true); setError(null); setResult(null);
-    setReserved(false); setReserveError(null);
+  // --- Hybrid Recommendation Execution ---
+  const handlePlanSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setRecommendations([]);
+    setSelectedIdx(0);
+    setReserved(false);
+    setReserveError(null);
+
     try {
-      const data = await getEstimate({
+      const data = await getHybridEstimate({
         event_type: form.event_type,
         theme: form.theme,
         guests: Number(form.guests),
         budget: Number(form.budget),
         event_date: form.event_date || undefined,
       });
-      if (data.error) setError(data.error);
-      else setResult(data);
-    } catch (e) {
-      setError("An unexpected error occurred while generating the estimate.");
+
+      if (data.error) {
+        setError(data.error);
+      } else if (data.recommendations && data.recommendations.length > 0) {
+        setRecommendations(data.recommendations);
+        setMeta(data.meta || null);
+      } else {
+        setError("No optimal recommendation could be computed with the given parameters.");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred while running the hybrid recommendation engine.");
     } finally {
       setLoading(false);
     }
   };
 
-  // --- Reserve: saved in Next.js (MySQL) for the logged-in customer ---
-  const reserve = async () => {
-    setReserving(true); setReserveError(null);
+  const handleOpenVisualizer = () => {
+    if (!loggedIn) {
+      setError("Please sign in to visualize custom AI concepts for your event.");
+      return;
+    }
+    setShowPopup(true);
+  };
+
+  const handleImagesGenerated = (urls) => {
+    setGeneratedImages(Array.isArray(urls) ? urls : [urls]);
+  };
+
+  // --- Reservation Execution ---
+  const handleReserve = async () => {
+    if (!currentPlan) return;
+    setReserving(true);
+    setReserveError(null);
+
     try {
       const payload = {
         event_type: form.event_type,
@@ -82,17 +115,23 @@ export default function EventPlanner({ loggedIn, customerName }) {
         guests: Number(form.guests),
         budget: Number(form.budget),
         theme: form.theme,
-        total_cost: result.total_cost,
-        venue_name: result.venue.name,
-        menu_name: result.menu.name,
-        decoration_name: result.decoration.name,
-        image_url: JSON.stringify(generatedImages),
+        total_cost: currentPlan.total_cost,
+        venue_name: currentPlan.venue.name,
+        menu_name: currentPlan.menu.name,
+        decoration_name: currentPlan.decoration.name,
+        // Server re-validates and re-serialises these; it ignores any
+        // client-supplied pricing entirely.
+        image_url_list: generatedImages,
       };
+
       const res = await createReservation(payload);
-      if (res.ok) setReserved(true);
-      else setReserveError(res.error);
-    } catch (e) {
-      setReserveError("Couldn't complete the reservation. Please try again.");
+      if (res.ok) {
+        setReserved(true);
+      } else {
+        setReserveError(res.error || "Failed to complete reservation.");
+      }
+    } catch (err) {
+      setReserveError("Could not complete the reservation. Please try again.");
     } finally {
       setReserving(false);
     }
@@ -102,152 +141,352 @@ export default function EventPlanner({ loggedIn, customerName }) {
     <main>
       <section className="tool-hero">
         <div className="wrap">
-          <span className="eyebrow">AI Event Coordinator</span>
-          <h1 className="display">Let&rsquo;s plan your celebration.</h1>
-          <p>Tell us about your event and the coordinator will recommend a venue, menu, and décor to suit your guest count and budget — then reserve it in a click.</p>
+          <span className="eyebrow">Hybrid Neuro-Symbolic AI Coordinator</span>
+          <h1 className="display">Multi-Objective Event Planning</h1>
+          <p>
+            Powered by a 3-layer hybrid architecture combining symbolic rule verification, Pareto multi-objective optimization, and explainable AI.
+          </p>
         </div>
       </section>
 
       {showPopup && (
-        <DesignGeneratorPopup 
-          onClose={() => setShowPopup(false)} 
-          onGenerate={handleGenerate} 
+        <DesignGeneratorPopup
+          onClose={() => setShowPopup(false)}
+          onGenerate={handleImagesGenerated}
+          eventContext={{
+            eventType: form.event_type,
+            venueName: currentPlan?.venue?.name || "Crystal Ballroom",
+            theme: form.theme,
+            guests: Number(form.guests),
+          }}
         />
       )}
 
       <section className="tool-body">
         <div className="wrap tool-grid">
-          {/* Form */}
+          {/* Left Form Card */}
           <div className="form-card">
-            <h2>Event details</h2>
-            <div className="f-grid">
+            <h2>Event Constraints</h2>
+            <form onSubmit={handlePlanSubmit} className="f-grid">
               <div className="field">
-                <label htmlFor="event_type">Event type</label>
+                <label htmlFor="event_type">Event Type</label>
                 <select id="event_type" value={form.event_type} onChange={update("event_type")}>
-                  {EVENT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  {EVENT_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
                 </select>
               </div>
+
               <div className="field">
-                <label htmlFor="theme">Theme</label>
+                <label htmlFor="theme">Aesthetic Theme</label>
                 <select id="theme" value={form.theme} onChange={update("theme")}>
-                  {THEMES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  {THEMES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
                 </select>
               </div>
+
               <div className="field">
-                <label htmlFor="guests">Guests</label>
-                <input id="guests" type="number" min="1" max="500" value={form.guests} onChange={update("guests")} />
+                <label htmlFor="guests">Guest Count</label>
+                <input
+                  id="guests"
+                  type="number"
+                  min="10"
+                  max="500"
+                  value={form.guests}
+                  onChange={update("guests")}
+                  required
+                />
               </div>
+
               <div className="field">
-                <label htmlFor="budget">Budget <span className="opt">(LKR)</span></label>
-                <input id="budget" type="number" min="0" step="10000" value={form.budget} onChange={update("budget")} />
+                <label htmlFor="budget">
+                  Budget <span className="opt">(LKR)</span>
+                </label>
+                <input
+                  id="budget"
+                  type="number"
+                  min="50000"
+                  step="10000"
+                  value={form.budget}
+                  onChange={update("budget")}
+                  required
+                />
               </div>
+
               <div className="field wide">
-                <label htmlFor="event_date">Event date <span className="opt">· required to reserve</span></label>
-                <input id="event_date" type="date" value={form.event_date} onChange={update("event_date")} />
+                <label htmlFor="event_date">
+                  Event Date <span className="opt">· evaluated for weather risk</span>
+                </label>
+                <input
+                  id="event_date"
+                  type="date"
+                  value={form.event_date}
+                  onChange={update("event_date")}
+                />
               </div>
-            </div>
-            <button className="btn btn-solid" onClick={handlePlanClick} disabled={loading}>
-              {loading ? "Planning…" : "Plan my event"}
-            </button>
-            {error && <div className="err">{error}</div>}
+
+              <div className="field wide mt-2">
+                <button type="submit" className="btn btn-solid w-full" disabled={loading}>
+                  {loading ? "Computing Optimal Pareto Frontiers..." : "Generate AI Recommendation"}
+                </button>
+              </div>
+            </form>
+
+            {error && <div className="err mt-4">{error}</div>}
+
+            {meta && (
+              <div className="meta-info-box mt-6">
+                <div className="meta-item">
+                  <span className="meta-label">Engine:</span>
+                  <span className="meta-val">{meta.engine_version}</span>
+                </div>
+                <div className="meta-item">
+                  <span className="meta-label">Feasible Combos Evaluated:</span>
+                  <span className="meta-val">{meta.feasible_count}</span>
+                </div>
+                <div className="meta-item">
+                  <span className="meta-label">Computation Latency:</span>
+                  <span className="meta-val">{meta.processing_time_ms}ms</span>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Result + reserve */}
+          {/* Right Result & Comparison Column */}
           <div className="result-wrap">
-            {!result && !loading && (
+            {!currentPlan && !loading && (
               <div className="empty-state">
-                <div className="frond-deco"><Frond stroke="currentColor" /></div>
-                <p>Your estimate will appear here once you plan an event.</p>
+                <div className="frond-deco">
+                  <Frond stroke="currentColor" />
+                </div>
+                <p>Configure your event parameters and run the coordinator to view Pareto-optimal packages with full causal explanations.</p>
               </div>
             )}
 
             {loading && (
-              <div className="empty-state" style={{ padding: '60px 40px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
-                  <svg style={{ animation: 'spin 1.5s linear infinite', height: '40px', width: '40px', color: 'var(--emerald)' }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <div className="empty-state" style={{ padding: "60px 40px" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
+                  <svg
+                    style={{ animation: "spin 1.5s linear infinite", height: "40px", width: "40px", color: "var(--emerald)" }}
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path
+                      style={{ opacity: 0.75 }}
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
                   <div>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: 'var(--emerald)', marginBottom: '8px' }}>Generating Your Design</h3>
-                    <p style={{ color: 'var(--mist)', fontSize: '0.95rem' }}>Our AI is creating 4 unique concepts based on your choices. This may take a few moments...</p>
-                  </div>
-                  <div style={{ width: '100%', maxWidth: '200px', height: '4px', background: 'var(--line)', borderRadius: '2px', overflow: 'hidden', marginTop: '10px' }}>
-                    <div style={{ width: '100%', height: '100%', background: 'var(--emerald)', animation: 'progress-indeterminate 1.5s infinite linear', transformOrigin: '0% 50%' }}></div>
+                    <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", color: "var(--emerald)", marginBottom: "8px" }}>
+                      Synthesizing Multi-Objective Optimization
+                    </h3>
+                    <p style={{ color: "var(--mist)", fontSize: "0.95rem" }}>
+                      Filtering rule constraints, evaluating venue feature embeddings, and computing Pareto fronts...
+                    </p>
                   </div>
                 </div>
               </div>
             )}
 
-            {result && !loading && (
+            {currentPlan && !loading && (
               <div className="slip">
-                {generatedImages.length > 0 && (
-                  <div className="mb-6">
-                    <div style={{ display: 'flex', overflowX: 'auto', gap: '12px', paddingBottom: '10px' }}>
-                      {generatedImages.map((img, i) => (
-                        <img 
-                          key={i} 
-                          src={img} 
-                          alt={`AI Generated Design ${i+1}`} 
-                          style={{ width: '280px', height: '280px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} 
-                        />
-                      ))}
+                {/* Pareto Package Selection Tabs */}
+                {recommendations.length > 1 && (
+                  <div className="pareto-tabs-wrapper mb-6">
+                    <div className="pareto-tabs-header">
+                      <span>Pareto Frontier Solutions ({recommendations.length}):</span>
                     </div>
-                    <p className="text-xs text-stone-500 mt-2 italic text-center">Swipe to see different angles (AI generated concepts)</p>
+                    <div className="pareto-tabs-grid">
+                      {recommendations.map((rec, idx) => {
+                        const isSel = idx === selectedIdx;
+                        const badgeInfo = PACKAGE_BADGES[rec.label] || { icon: Award, color: "#1A3C34", bg: "#EBF2EE" };
+                        const IconComponent = badgeInfo.icon;
+
+                        return (
+                          <button
+                            key={rec.id || idx}
+                            type="button"
+                            className={`pareto-tab-btn ${isSel ? "active" : ""}`}
+                            onClick={() => setSelectedIdx(idx)}
+                          >
+                            <div className="pareto-tab-top">
+                              <span className="pareto-badge" style={{ backgroundColor: badgeInfo.bg, color: badgeInfo.color }}>
+                                <IconComponent size={13} />
+                                {rec.label}
+                              </span>
+                              <span className="pareto-score">
+                                {Math.round((rec.aggregate || 0) * 100)}% Match
+                              </span>
+                            </div>
+                            <div className="pareto-tab-venue">{rec.venue.name}</div>
+                            <div className="pareto-tab-cost">{fmt(rec.total_cost)}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
+
+                {/* AI Design Concept Section */}
+                <div className="ai-concept-preview-card mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h4 className="font-serif text-lg font-bold text-emerald">Spatial Concept Visualization</h4>
+                      <p className="text-xs text-stone-500">Multimodal architectural rendering of {currentPlan.venue.name}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleOpenVisualizer}
+                      className="btn btn-sm btn-ghost"
+                      style={{ fontSize: "0.8rem", padding: "6px 12px" }}
+                    >
+                      <Sparkles size={14} className="text-gold" />
+                      {generatedImages.length > 0 ? "Regenerate Perspectives" : "Generate 3D Visuals"}
+                    </button>
+                  </div>
+
+                  {generatedImages.length > 0 ? (
+                    <div>
+                      <div style={{ display: "flex", overflowX: "auto", gap: "12px", paddingBottom: "10px" }}>
+                        {generatedImages.map((img, i) => (
+                          <img
+                            key={i}
+                            src={img}
+                            alt={`AI Generated Architecture Perspective ${i + 1}`}
+                            style={{ width: "260px", height: "260px", objectFit: "cover", borderRadius: "8px", flexShrink: 0 }}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-xs text-stone-500 mt-2 italic text-center">Synchronized perspective renders (Entrance, Floorplan, Centerpiece, Ceiling)</p>
+                    </div>
+                  ) : (
+                    <div className="concept-placeholder" onClick={handleOpenVisualizer}>
+                      <Sparkles size={24} className="text-gold mb-2" />
+                      <p className="text-sm font-medium">Click to synthesize 4 synchronized architectural perspectives for this venue.</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Package Head */}
                 <div className="slip-head">
-                  <h3>Your estimate</h3>
-                  <span className={`verdict ${result.within_budget ? "ok" : "over"}`}>
-                    <span className="dot" />{result.within_budget ? "Within budget" : "Over budget"}
+                  <div>
+                    <h3>{currentPlan.label} Package</h3>
+                    <span className="text-xs text-stone-500">{currentPlan.venue.name} · {currentPlan.guests} Guests</span>
+                  </div>
+                  <span className={`verdict ${currentPlan.within_budget ? "ok" : "over"}`}>
+                    <span className="dot" />
+                    {currentPlan.within_budget ? "Within budget" : "Over budget"}
                   </span>
                 </div>
 
+                {/* Itemized Line Items */}
                 <div className="li">
-                  <div><div className="li-name">{result.venue.name}</div><div className="li-sub">Venue hire</div></div>
-                  <div className="li-cost">{fmt(result.venue.cost)}</div>
-                </div>
-                <div className="li">
-                  <div><div className="li-name">{result.menu.name}</div><div className="li-sub">{fmt(result.menu.price_per_head)} × {result.guests} guests</div></div>
-                  <div className="li-cost">{fmt(result.menu.cost)}</div>
-                </div>
-                <div className="li">
-                  <div><div className="li-name">{result.decoration.name}</div><div className="li-sub">Decoration</div></div>
-                  <div className="li-cost">{fmt(result.decoration.cost)}</div>
-                </div>
-                <div className="slip-total">
-                  <span className="lbl">Total estimate</span>
-                  <span className="val">{fmt(result.total_cost)}</span>
+                  <div>
+                    <div className="li-name">{currentPlan.venue.name}</div>
+                    <div className="li-sub">
+                      Venue hire · {currentPlan.venue.is_outdoor ? "Open-air Garden" : "Indoor Climate Controlled"} (Cap: {currentPlan.venue.min_cap}–{currentPlan.venue.max_cap})
+                    </div>
+                  </div>
+                  <div className="li-cost">{fmt(currentPlan.venue.cost)}</div>
                 </div>
 
-                {(result.warnings?.length > 0 || result.suggestions?.length > 0) && (
+                <div className="li">
+                  <div>
+                    <div className="li-name">{currentPlan.menu.name}</div>
+                    <div className="li-sub">{fmt(currentPlan.menu.price_per_head)} × {currentPlan.guests} guests</div>
+                  </div>
+                  <div className="li-cost">{fmt(currentPlan.menu.cost)}</div>
+                </div>
+
+                <div className="li">
+                  <div>
+                    <div className="li-name">{currentPlan.decoration.name}</div>
+                    <div className="li-sub">
+                      Theme: {currentPlan.decoration.theme.toUpperCase()} · Tier: {currentPlan.decoration.tier.toUpperCase()}
+                    </div>
+                  </div>
+                  <div className="li-cost">{fmt(currentPlan.decoration.cost)}</div>
+                </div>
+
+                <div className="slip-total">
+                  <span className="lbl">Total Estimated Investment</span>
+                  <span className="val">{fmt(currentPlan.total_cost)}</span>
+                </div>
+
+                {/* Notices & Upsells */}
+                {(currentPlan.warnings?.length > 0 || currentPlan.suggestions?.length > 0) && (
                   <div className="notices">
-                    {result.warnings?.map((w, i) => <div key={`w${i}`} className="notice warn">{w}</div>)}
-                    {result.suggestions?.map((s, i) => <div key={`s${i}`} className="notice tip">{s}</div>)}
+                    {currentPlan.warnings?.map((w, i) => (
+                      <div key={`w${i}`} className="notice warn">
+                        <AlertCircle size={14} className="inline mr-1" />
+                        {w}
+                      </div>
+                    ))}
+                    {currentPlan.suggestions?.map((s, i) => (
+                      <div key={`s${i}`} className="notice tip">
+                        <Sparkles size={14} className="inline mr-1" />
+                        {s}
+                      </div>
+                    ))}
                   </div>
                 )}
 
-                {/* Reserve area */}
-                <div className="reserve-area">
+                {/* XAI Explanation Panel */}
+                {currentPlan.explanation && (
+                  <ExplanationPanel
+                    explanation={currentPlan.explanation}
+                    scores={currentPlan.scores || []}
+                  />
+                )}
+
+                {/* Reservation Action Area */}
+                <div className="reserve-area mt-6">
                   {reserved ? (
                     <div className="reserve-done">
-                      <strong>Reservation requested 🎉</strong>
-                      <p>Thanks{customerName ? `, ${customerName.split(" ")[0]}` : ""} — your event is pending confirmation. You can view it in your account.</p>
-                      <Link href="/account" className="btn btn-ghost">View my bookings</Link>
+                      <CheckCircle2 size={32} className="text-emerald mx-auto mb-2" />
+                      <strong>Reservation Requested Successfully 🎉</strong>
+                      <p>
+                        Thank you{customerName ? `, ${customerName.split(" ")[0]}` : ""}. Your booking is pending confirmation. You can review your reservation details and submit feedback anytime.
+                      </p>
+                      <Link href="/account" className="btn btn-ghost mt-2">
+                        View in Account Dashboard
+                      </Link>
                     </div>
                   ) : !loggedIn ? (
                     <div className="reserve-login">
-                      <p>Please sign in to reserve this event.</p>
+                      <p>Sign in to confirm and reserve this custom AI package.</p>
                       <div className="reserve-actions">
-                        <Link href="/login" className="btn btn-solid">Sign in</Link>
-                        <Link href="/register" className="btn btn-ghost">Create account</Link>
+                        <Link href="/login" className="btn btn-solid">
+                          Sign in
+                        </Link>
+                        <Link href="/register" className="btn btn-ghost">
+                          Create account
+                        </Link>
                       </div>
                     </div>
                   ) : !form.event_date ? (
-                    <div className="reserve-note">Add an <strong>event date</strong> above and plan again to reserve.</div>
+                    <div className="reserve-note">
+                      Please select an <strong>event date</strong> in the constraints form to reserve.
+                    </div>
                   ) : (
                     <>
-                      <button className="btn btn-gold reserve-btn" onClick={reserve} disabled={reserving}>
-                        {reserving ? "Reserving…" : "Reserve this event"}
+                      <button
+                        type="button"
+                        className="btn btn-gold reserve-btn"
+                        onClick={handleReserve}
+                        disabled={reserving}
+                      >
+                        {reserving ? "Locking in Reservation..." : `Reserve ${currentPlan.label} (${fmt(currentPlan.total_cost)})`}
                       </button>
-                      {reserveError && <div className="err">{reserveError}</div>}
+                      {reserveError && <div className="err mt-2">{reserveError}</div>}
                     </>
                   )}
                 </div>
