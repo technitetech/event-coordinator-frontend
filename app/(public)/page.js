@@ -431,6 +431,19 @@ export default function Home() {
 
       {/* ========== EVENT TYPES — inspired by Eloraharbor / Norvyn ========== */}
       <section className="section event-types-section" id="events-section">
+        {/* Coastal Seashells Garland Background Accent */}
+        <div className="event-types-shell-accent" aria-hidden="true">
+          <Image
+            src="/images/shell_right_hd.png"
+            alt="Coastal Seashell Garland Artwork"
+            width={750}
+            height={1332}
+            quality={90}
+            priority={false}
+            className="shell-accent-img"
+          />
+        </div>
+
         <div className="wrap">
           <Reveal className="section-head">
             <span className="eyebrow">What we do</span>
