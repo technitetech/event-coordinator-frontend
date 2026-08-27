@@ -1119,6 +1119,38 @@ a, button, [role="button"], select, label[for], .venue-card,
   position: relative;
   background: var(--ivory);
   padding-top: clamp(60px, 7vw, 90px);
+  padding-bottom: clamp(100px, 14vw, 180px);
+  overflow: hidden;
+}
+
+.event-types-section .wrap {
+  position: relative;
+  z-index: 2;
+}
+
+.event-types-wave-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: clamp(120px, 16vw, 220px);
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.event-types-wave-bottom .wave-pattern-img {
+  width: 100%;
+  max-width: 1400px;
+  height: 100%;
+  object-fit: cover;
+  object-position: bottom center;
+  opacity: 0.92;
+  filter: drop-shadow(0 -6px 16px rgba(10, 110, 92, 0.1));
 }
 
 /* ==============================================

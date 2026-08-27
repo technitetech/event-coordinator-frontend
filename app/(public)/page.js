@@ -473,6 +473,18 @@ export default function Home() {
             })}
           </div>
         </div>
+
+        {/* Coastal Ocean Wave Decorative Bottom Artwork */}
+        <div className="event-types-wave-bottom" aria-hidden="true">
+          <Image
+            src="/images/wave-removebg-preview.png"
+            alt="Coastal Ocean Waves Pattern"
+            width={1314}
+            height={760}
+            quality={90}
+            className="wave-pattern-img"
+          />
+        </div>
       </section>
 
       {/* ========== OUR APPROACH — inspired by Norvyn Events / Eloraharbor ========== */}
