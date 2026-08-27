@@ -391,6 +391,20 @@ export default function Home() {
 
       {/* ========== POPULAR VENUES — inspired by Luxury Resort / Travel Booking ========== */}
       <section className="section venues-section" id="venues">
+        {/* Oceanfront Infinity Pool Panoramic Background */}
+        <div className="venues-bg-img" aria-hidden="true">
+          <Image
+            src="/images/Piscine_Couloir_de_Nage_-_202608272014.jpeg"
+            alt="St. Lachland Oceanfront Luxury Pool & Venues"
+            fill
+            sizes="100vw"
+            quality={85}
+            priority={false}
+            className="object-cover"
+          />
+          <div className="venues-bg-overlay" />
+        </div>
+
         <div className="wrap">
           <Reveal>
             <div className="section-header">
