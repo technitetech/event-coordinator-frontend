@@ -1527,6 +1527,37 @@ a, button, [role="button"], select, label[for], .venue-card,
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* Direct Contact Hotline Button in Packages Section */
+.btn-pkg-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(200, 150, 62, 0.4);
+  border-radius: 8px;
+  color: #ffffff !important;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-pkg-contact:hover {
+  background: rgba(200, 150, 62, 0.18);
+  border-color: var(--gold);
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(200, 150, 62, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-pkg-contact span {
+  color: #ffffff;
+}
+
+.btn-pkg-contact .material-symbols-outlined {
+  color: var(--gold);
+}
+
 @media (max-width: 768px) {
   .packages-section {
     padding: 60px 0;

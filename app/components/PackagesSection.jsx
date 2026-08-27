@@ -286,10 +286,11 @@ export default function PackagesSection() {
               </Link>
               <a 
                 href="tel:+94704381343" 
-                className="btn btn-ghost text-xs text-white border-white/20 hover:border-gold px-4 py-2.5 inline-flex items-center gap-1.5 font-mono"
+                className="btn-pkg-contact"
+                title="Call Reservations Directly"
               >
-                <span className="material-symbols-outlined text-sm text-gold">call</span>
-                <span>+94 70 438 1343</span>
+                <span className="material-symbols-outlined text-sm text-gold shrink-0">call</span>
+                <span className="font-mono text-xs font-semibold text-white tracking-wide">+94 70 438 1343</span>
               </a>
             </div>
           </div>
