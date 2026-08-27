@@ -7,6 +7,7 @@ import VenueCarousel from "../components/VenueCarousel.jsx";
 import TestimonialCarousel from "../components/TestimonialCarousel.jsx";
 import CountUp from "../components/CountUp.jsx";
 import NegomboEnvironmentSection from "../components/NegomboEnvironmentSection.jsx";
+import PackagesSection from "../components/PackagesSection.jsx";
 import { 
   Waves, Sparkles, Utensils, Martini, Wifi, Car,
   Diamond, Users, Cake, Wine,
@@ -384,6 +385,9 @@ export default function Home() {
 
       {/* ========== NEGOMBO LOCATION & ENVIRONMENT SECTION (3D Bento & Telemetry) ========== */}
       <NegomboEnvironmentSection />
+
+      {/* ========== SIGNATURE PACKAGES & PROMOTIONAL FLYERS SECTION ========== */}
+      <PackagesSection />
 
       {/* ========== POPULAR VENUES — inspired by Luxury Resort / Travel Booking ========== */}
       <section className="section venues-section" id="venues">

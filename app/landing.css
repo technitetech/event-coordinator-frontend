@@ -1332,3 +1332,363 @@ a, button, [role="button"], select, label[for], .venue-card,
   .newsletter-form input { text-align: center; }
   .newsletter-form .btn { border-radius: 0 0 12px 12px; justify-content: center; }
 }
+
+/* ==============================================
+   PACKAGES & PROMOTIONAL FLYERS SECTION — UI/UX PRO MAX
+   ============================================== */
+.packages-section {
+  position: relative;
+  background: #04120e;
+  color: var(--ivory);
+  padding: 100px 0;
+  overflow: hidden;
+}
+
+.pkg-glow-top {
+  position: absolute;
+  top: -120px;
+  left: 30%;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.pkg-glow-bottom {
+  position: absolute;
+  bottom: -150px;
+  right: 20%;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 150, 62, 0.07) 0%, transparent 70%);
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+.pkg-header {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.pkg-main-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.8vw, 3rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.pkg-lead-subtitle {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 10px;
+  line-height: 1.6;
+}
+
+/* Tab Switcher */
+.pkg-tab-container {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px;
+  border-radius: 9999px;
+  gap: 4px;
+}
+
+.pkg-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pkg-tab-btn:hover {
+  color: #ffffff;
+}
+
+.pkg-tab-btn.active {
+  background: var(--gold);
+  color: #04120e;
+  box-shadow: 0 4px 14px rgba(200, 150, 62, 0.35);
+}
+
+/* DAY OUTING HERO SHOWCASE CARD */
+.dayout-showcase-card {
+  background: linear-gradient(135deg, rgba(8, 32, 25, 0.92) 0%, rgba(4, 18, 14, 0.98) 100%);
+  border: 1px solid rgba(200, 150, 62, 0.3);
+  border-radius: 24px;
+  padding: 36px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+}
+
+.dayout-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.dayout-flyer-wrapper {
+  position: relative;
+}
+
+.dayout-flyer-preview {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(200, 150, 62, 0.4);
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #000;
+}
+
+.dayout-flyer-preview:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 45px rgba(200, 150, 62, 0.25);
+}
+
+.dayout-flyer-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.dayout-flyer-preview:hover .dayout-flyer-image {
+  transform: scale(1.03);
+}
+
+.dayout-flyer-hover-action {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 18, 14, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.dayout-flyer-preview:hover .dayout-flyer-hover-action {
+  opacity: 1;
+}
+
+.dayout-flyer-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.65rem;
+  font-family: monospace;
+  color: #ffffff;
+}
+
+.dayout-flyer-thumbs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.dayout-thumb-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #fff;
+}
+
+.dayout-thumb-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dayout-thumb-btn.active {
+  background: rgba(200, 150, 62, 0.15);
+  border-color: var(--gold);
+}
+
+.dayout-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(200, 150, 62, 0.15);
+  border: 1px solid rgba(200, 150, 62, 0.4);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dayout-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.dayout-inclusions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.dayout-inc-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.dayout-inc-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(200, 150, 62, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dayout-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* EVENT MENU PACKAGES (4-TIER CARDS) */
+.pkg-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(6, 25, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  position: relative;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+}
+
+.pkg-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(200, 150, 62, 0.5);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.pkg-card-featured {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, rgba(20, 48, 38, 0.95) 0%, rgba(6, 25, 20, 0.95) 100%);
+  box-shadow: 0 12px 35px rgba(200, 150, 62, 0.2);
+}
+
+.pkg-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: rgba(200, 150, 62, 0.18);
+  border: 1px solid rgba(200, 150, 62, 0.4);
+  color: var(--gold);
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pkg-menu-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.pkg-menu-subtitle {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 2px;
+}
+
+.pkg-price-banner {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 16px 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pkg-item-list {
+  flex: 1;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
+}
+
+.pkg-item-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+@media (max-width: 1024px) {
+  .dayout-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .dayout-flyer-wrapper {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  .dayout-inclusions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .packages-section {
+    padding: 60px 0;
+  }
+  .dayout-showcase-card {
+    padding: 20px;
+  }
+  .dayout-inclusions-grid {
+    grid-template-columns: 1fr;
+  }
+  .pkg-tab-container {
+    flex-direction: column;
+    border-radius: 16px;
+  }
+}
