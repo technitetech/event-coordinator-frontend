@@ -1137,23 +1137,18 @@ a, button, [role="button"], select, label[for], .venue-card,
   left: 0;
   right: 0;
   width: 100%;
-  height: clamp(200px, 28vw, 420px);
+  height: clamp(160px, 20vw, 320px);
   z-index: 1;
   pointer-events: none;
   overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
 }
 
 .event-types-wave-bottom .wave-pattern-img {
   width: 100%;
-  max-width: 1550px;
   height: 100%;
-  object-fit: contain;
+  object-fit: fill;
   object-position: bottom center;
-  opacity: 0.95;
-  filter: drop-shadow(0 -10px 30px rgba(10, 110, 92, 0.16));
+  display: block;
 }
 
 /* Equal Height Event Cards */
