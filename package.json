@@ -9,7 +9,8 @@
     "start": "next start",
     "preview": "next build && next start",
     "create-admin": "node scripts/create-admin.mjs",
-    "verify": "node scripts/verify-fixes.mjs && node scripts/verify-concurrency.mjs"
+    "verify": "node scripts/verify-fixes.mjs && node scripts/verify-concurrency.mjs",
+    "train:ml": "node scripts/generate-training-data.mjs && bash scripts/train-ml.sh"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

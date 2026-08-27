@@ -1,0 +1,39 @@
+{
+  "coefficients": [
+    0.4380863119485776,
+    0.43610186211591595,
+    0.8047439787124139,
+    0.7436611080802403,
+    0.7464927715086211,
+    0.3786968041990854,
+    0.8167676969074101,
+    -2.133017962099182,
+    -0.09736577386073231,
+    -0.01352661908428233,
+    -0.21812652430847015,
+    -0.045383397946282315,
+    -0.0760629876416698
+  ],
+  "intercept": -0.35309952898081565,
+  "feature_names": [
+    "Ambiance",
+    "Photo Quality",
+    "Accessibility",
+    "Quietness",
+    "Natural Light",
+    "Tech Readiness",
+    "Decoration Tier",
+    "Budget Ratio",
+    "Capacity Utilization",
+    "Is Wedding",
+    "Is Conference",
+    "Is Birthday",
+    "Is Dinner"
+  ],
+  "trained_at": "2026-08-27T04:34:14.131408+00:00",
+  "trained_with": "scikit-learn LogisticRegression (C=1.0) via train_ml_scorer.ipynb",
+  "n_samples": 2000,
+  "train_accuracy": 0.653125,
+  "test_accuracy": 0.615,
+  "test_roc_auc": 0.6335238095238095
+}

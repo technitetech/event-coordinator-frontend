@@ -5,6 +5,7 @@ import Link from "next/link";
 import Frond from "../../components/Frond";
 import { createReservation, getHybridEstimate } from "./actions";
 import DesignGeneratorPopup from "../../components/DesignGeneratorPopup";
+import ChatAssistantPopup from "../../components/ChatAssistantPopup";
 import ExplanationPanel from "../../components/ExplanationPanel";
 import { Sparkles, Award, TrendingUp, DollarSign, CheckCircle2, AlertCircle } from "lucide-react";
 
@@ -50,6 +51,7 @@ export default function EventPlanner({ loggedIn, customerName }) {
 
   const [showPopup, setShowPopup] = useState(false);
   const [generatedImages, setGeneratedImages] = useState([]);
+  const [showChat, setShowChat] = useState(false);
 
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
@@ -102,6 +104,22 @@ export default function EventPlanner({ loggedIn, customerName }) {
     setGeneratedImages(Array.isArray(urls) ? urls : [urls]);
   };
 
+  const handleApplyChatPlan = (fields, recommendation) => {
+    setForm((f) => ({
+      ...f,
+      event_type: fields.event_type ?? f.event_type,
+      guests: fields.guests ?? f.guests,
+      budget: fields.budget ?? f.budget,
+      theme: fields.theme ?? f.theme,
+      event_date: fields.event_date ?? f.event_date,
+    }));
+    setRecommendations([recommendation]);
+    setMeta(null);
+    setSelectedIdx(0);
+    setError(null);
+    setShowChat(false);
+  };
+
   // --- Reservation Execution ---
   const handleReserve = async () => {
     if (!currentPlan) return;
@@ -146,6 +164,9 @@ export default function EventPlanner({ loggedIn, customerName }) {
           <p>
             Powered by a 3-layer hybrid architecture combining symbolic rule verification, Pareto multi-objective optimization, and explainable AI.
           </p>
+          <button type="button" className="dg-btn-submit chat-trigger-btn" onClick={() => setShowChat(true)}>
+            Chat with Coordinator
+          </button>
         </div>
       </section>
 
@@ -159,6 +180,13 @@ export default function EventPlanner({ loggedIn, customerName }) {
             theme: form.theme,
             guests: Number(form.guests),
           }}
+        />
+      )}
+
+      {showChat && (
+        <ChatAssistantPopup
+          onClose={() => setShowChat(false)}
+          onApplyPlan={handleApplyChatPlan}
         />
       )}
 
