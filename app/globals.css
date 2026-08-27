@@ -918,13 +918,13 @@ h3.display { font-size: clamp(1.5rem, 3vw, 2rem); }
    ===================================================== */
 .coord { background: var(--parchment); }
 .coord-card {
-  position: relative; overflow: hidden; border-radius: 16px;
-  background: linear-gradient(155deg, #0f3b2e, #0c2b21 60%, #14261d);
+  position: relative; overflow: hidden; border-radius: 20px;
   color: #fff; padding: clamp(40px, 6vw, 76px);
   display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 50px; align-items: center;
+  border: 1px solid rgba(200, 150, 62, 0.25);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
 }
-.coord-card::after { content:""; position:absolute; inset:0; background: var(--grain); opacity:0.4; mix-blend-mode: overlay; pointer-events:none; }
-.coord-frond { position: absolute; right: -60px; bottom: -60px; width: 380px; opacity: 0.28; pointer-events: none; }
+.coord-frond { position: absolute; right: -60px; bottom: -60px; width: 380px; opacity: 0.28; pointer-events: none; z-index: 2; }
 .coord-frond svg { width: 100%; }
 .coord-copy { position: relative; z-index: 2; }
 .coord-copy .eyebrow { color: var(--gold); display: block; margin-bottom: 18px; }

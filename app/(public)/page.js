@@ -490,12 +490,25 @@ export default function Home() {
         <div className="wrap">
           <Reveal>
             <div className="assist-card">
+              {/* Background Watercolor Ocean Pattern */}
+              <div className="assist-bg-img" aria-hidden="true">
+                <Image
+                  src="/images/pattern2.jpeg"
+                  alt="Coastal Watercolor Ocean Art Pattern"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 1200px"
+                  quality={80}
+                  className="object-cover object-center"
+                />
+                <div className="assist-bg-overlay" />
+              </div>
+
               <div className="assist-main">
                 <span className="assist-kicker">We&rsquo;re here to help</span>
                 <h3 className="display">Need Assistance?</h3>
                 <p>
                   Our event experts are ready to help you plan your perfect
-                  celebration at the estate.
+                  celebration at the resort.
                 </p>
                 <div className="assist-actions">
                   <Link href="/events" className="btn btn-gold">
@@ -545,6 +558,19 @@ export default function Home() {
         <div className="wrap">
           <Reveal>
             <div className="coord-card">
+              {/* Background Watercolor Ocean Pattern */}
+              <div className="coord-bg-img" aria-hidden="true">
+                <Image
+                  src="/images/pattern2.jpeg"
+                  alt="Coastal Ocean Art Pattern"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 1200px"
+                  quality={80}
+                  className="object-cover object-center"
+                />
+                <div className="coord-bg-overlay" />
+              </div>
+
               <div className="coord-frond">
                 <Frond stroke="#d6bb6e" />
               </div>
