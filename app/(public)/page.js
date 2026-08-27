@@ -428,6 +428,9 @@ export default function Home() {
 
       {/* ========== EVENT TYPES — inspired by Eloraharbor / Norvyn ========== */}
       <section className="section event-types-section" id="events-section">
+        {/* Paper Tear Transition Divider from Venues to What We Do */}
+        <div className="tear-divider-bottom" aria-hidden="true" />
+
         <div className="wrap">
           <Reveal className="section-head">
             <span className="eyebrow">What we do</span>

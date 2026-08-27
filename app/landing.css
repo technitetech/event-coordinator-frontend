@@ -39,7 +39,6 @@
 
 /* Subtle editorial divider between adjacent light sections — a short
    centered gold hairline that reads as an intentional section break. */
-.event-types-section::before,
 .coord::before,
 .trust-section::before,
 .cta-band::before {
@@ -1096,6 +1095,30 @@ a, button, [role="button"], select, label[for], .venue-card,
 .venue-card-fav:hover {
   color: #e23b3b;
   transform: scale(1.1);
+}
+
+/* ==============================================
+   PAPER TEAR BOTTOM SECTION DIVIDER (VENUES -> WHAT WE DO)
+   ============================================== */
+.tear-divider-bottom {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 90px;
+  background-image: url("/images/tear_ivory_transition_wide.png");
+  background-repeat: repeat-x;
+  background-position: top center;
+  background-size: 1194px 90px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.event-types-section {
+  position: relative;
+  background: var(--ivory);
+  padding-top: 110px;
 }
 
 /* ==============================================
