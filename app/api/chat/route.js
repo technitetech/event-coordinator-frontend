@@ -26,10 +26,20 @@ function stripCodeFences(text) {
   return text.replace(/```json\s*/gi, "").replace(/```/g, "").trim();
 }
 
-/** Regex/keyword fallback used when the LLM extraction call fails. */
-function extractFieldsRuleBased(message) {
+/**
+ * Regex/keyword fallback used when the LLM extraction call fails (e.g. the
+ * FreeLLM gateway isn't reachable from wherever this server is running).
+ *
+ * `pendingField` is whichever field the assistant had just asked for before
+ * this reply (computed from the incoming sessionState) — without it, a bare
+ * reply like "150" typed in direct answer to "how many guests?" matches none
+ * of the explicit patterns below and gets silently dropped, causing the same
+ * question to repeat forever. With it, a short reply that doesn't otherwise
+ * match anything is assigned to the field that was actually being asked.
+ */
+function extractFieldsRuleBased(message, pendingField) {
   const fields = {};
-  const lower = message.toLowerCase();
+  const lower = message.toLowerCase().trim();
 
   for (const t of EVENT_TYPES) {
     if (lower.includes(t)) fields.event_type = t;
@@ -50,6 +60,21 @@ function extractFieldsRuleBased(message) {
 
   const dateMatch = message.match(/\d{4}-\d{2}-\d{2}/);
   if (dateMatch) fields.event_date = dateMatch[0];
+
+  // Bare-answer fallback: nothing above matched this specific field yet, but
+  // the message is short and directly answers what was just asked.
+  const bareNumberMatch = lower.match(/^[^\d]*(\d[\d,]*)[^\d]*$/);
+  if (bareNumberMatch) {
+    const n = Number(bareNumberMatch[1].replace(/,/g, ""));
+    if (pendingField === "guests" && fields.guests === undefined) fields.guests = n;
+    else if (pendingField === "budget" && fields.budget === undefined) fields.budget = n;
+  }
+  if (pendingField === "event_type" && fields.event_type === undefined) {
+    if (lower === "birthday" || lower === "conference") fields.event_type = lower;
+  }
+  if (pendingField === "theme" && fields.theme === undefined) {
+    if (lower === "modern" || lower === "tropical") fields.theme = lower;
+  }
 
   return fields;
 }
@@ -111,6 +136,7 @@ export async function POST(req) {
     }
 
     const lastUserMessage = [...messages].reverse().find((m) => m.role === "user")?.content || "";
+    const pendingField = nextMissingField(sessionState);
 
     let extracted;
     let extractionFailed = false;
@@ -118,13 +144,22 @@ export async function POST(req) {
       extracted = await extractFields(messages, sessionState);
     } catch {
       extractionFailed = true;
-      extracted = extractFieldsRuleBased(lastUserMessage);
+      extracted = extractFieldsRuleBased(lastUserMessage, pendingField);
     }
 
     for (const key of ["event_type", "guests", "budget", "theme", "event_date"]) {
       if (extracted[key] !== undefined && extracted[key] !== null && extracted[key] !== "") {
         sessionState[key] = extracted[key];
       }
+    }
+
+    // Backstop: if the field that was just being asked about is still
+    // missing after the primary extraction (LLM or fallback), make one more
+    // pass with the rule-based bare-answer logic before giving up on it —
+    // guards against the LLM path succeeding but missing a terse reply.
+    if (pendingField && (sessionState[pendingField] === undefined || sessionState[pendingField] === null || sessionState[pendingField] === "")) {
+      const backstop = extractFieldsRuleBased(lastUserMessage, pendingField);
+      if (backstop[pendingField] !== undefined) sessionState[pendingField] = backstop[pendingField];
     }
 
     if (!isReady(sessionState)) {
