@@ -926,19 +926,22 @@ h3.display { font-size: clamp(1.5rem, 3vw, 2rem); }
 }
 .coord-frond { position: absolute; right: -60px; bottom: -60px; width: 380px; opacity: 0.28; pointer-events: none; z-index: 2; }
 .coord-frond svg { width: 100%; }
-.coord-copy { position: relative; z-index: 2; }
-.coord-copy .eyebrow { color: var(--gold); display: block; margin-bottom: 18px; }
-.coord-copy h2 { margin-bottom: 20px; }
-.coord-copy p { color: rgba(255,255,255,0.8); margin-bottom: 30px; max-width: 44ch; }
-.coord-features { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 2px; }
+.coord-copy { position: relative; z-index: 2; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85); }
+.coord-copy .eyebrow { color: var(--gold); display: block; margin-bottom: 18px; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9); }
+.coord-copy h2 { margin-bottom: 20px; color: #ffffff; text-shadow: 0 3px 14px rgba(0, 0, 0, 0.9); }
+.coord-copy p { color: #ffffff; margin-bottom: 30px; max-width: 44ch; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9); }
+.coord-features { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 8px; }
 .coord-feat {
   display: flex; gap: 18px; align-items: flex-start;
-  padding: 20px 22px; background: rgba(255,255,255,0.05);
-  border-left: 2px solid var(--gold);
+  padding: 20px 22px; background: rgba(4, 18, 14, 0.82);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 .coord-feat .fn { font-size: 1.5rem; line-height: 1; min-width: 34px; }
-.coord-feat h4 { font-size: 0.95rem; margin-bottom: 4px; }
-.coord-feat p { font-size: 0.85rem; color: rgba(255,255,255,0.7); margin: 0; }
+.coord-feat h4 { font-size: 0.95rem; margin-bottom: 4px; color: #ffffff; }
+.coord-feat p { font-size: 0.85rem; color: rgba(255,255,255,0.85); margin: 0; }
 @media (max-width: 860px) { .coord-card { grid-template-columns: 1fr; gap: 36px; } }
 
 /* =====================================================
