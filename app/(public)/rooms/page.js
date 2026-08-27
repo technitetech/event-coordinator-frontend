@@ -5,7 +5,7 @@ import { Calendar, Search, Sparkles, Shield, Coffee, Compass } from "lucide-reac
 
 export const metadata = {
   title: "Luxury Accommodation & Suites — St. Lachland Hotel",
-  description: "Experience refined hill-country sanctuary in Nuwara Eliya. Book boutique rooms, suites, and private heritage villas.",
+  description: "Experience refined coastal sanctuary in Negombo. Book boutique ocean rooms, suites, and private beach villas.",
 };
 
 export default async function RoomsPage({ searchParams }) {
@@ -28,10 +28,10 @@ export default async function RoomsPage({ searchParams }) {
       {/* Hero Section */}
       <section className="tool-hero bg-emerald text-ivory">
         <div className="wrap text-center">
-          <span className="eyebrow">Hill-Country Sanctuary</span>
-          <h1 className="display">Refined Estate Accommodation</h1>
+          <span className="eyebrow">Coastal Oceanfront Sanctuary</span>
+          <h1 className="display">Refined Beachfront Accommodation</h1>
           <p className="max-w-2xl mx-auto">
-            Each room and private villa at St. Lachland is architecturally positioned to capture the dramatic highland mist, heirloom tea terraces, and historic colonial charm.
+            Each room and private villa at St. Lachland is architecturally positioned to capture the dramatic Indian Ocean sunsets, swaying coconut palms, and tropical luxury charm.
           </p>
         </div>
       </section>
@@ -135,8 +135,8 @@ export default async function RoomsPage({ searchParams }) {
               <div className="perk-icon-wrap">
                 <Coffee size={24} className="text-emerald" />
               </div>
-              <h4 className="font-serif font-bold text-lg mb-2 text-emerald">Estate Pekoe Tasting</h4>
-              <p className="text-xs text-stone-600">Daily afternoon Ceylon tea ceremony curated by our resident tea master.</p>
+              <h4 className="font-serif font-bold text-lg mb-2 text-emerald">Artisan Tea Tasting</h4>
+              <p className="text-xs text-stone-600">Daily afternoon Ceylon tea and sunset refreshments curated by our sommelier.</p>
             </div>
 
             <div className="perk-card">
@@ -144,15 +144,15 @@ export default async function RoomsPage({ searchParams }) {
                 <Sparkles size={24} className="text-gold" />
               </div>
               <h4 className="font-serif font-bold text-lg mb-2 text-emerald">Dedicated Butler Care</h4>
-              <p className="text-xs text-stone-600">Discreet 24-hour estate concierge and luggage pressing services.</p>
+              <p className="text-xs text-stone-600">Discreet 24-hour coastal resort concierge and pressing services.</p>
             </div>
 
             <div className="perk-card">
               <div className="perk-icon-wrap">
                 <Compass size={24} className="text-emerald" />
               </div>
-              <h4 className="font-serif font-bold text-lg mb-2 text-emerald">Highland Nature Walks</h4>
-              <p className="text-xs text-stone-600">Guided sunrise bird watching and botanical plantation excursions.</p>
+              <h4 className="font-serif font-bold text-lg mb-2 text-emerald">Coastal &amp; Lagoon Tours</h4>
+              <p className="text-xs text-stone-600">Guided sunset beach walks and Negombo lagoon catamaran boat tours.</p>
             </div>
 
             <div className="perk-card">

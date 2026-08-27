@@ -1,10 +1,10 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "St. Lachland Hotel — Hill-Country Luxury, Sri Lanka",
+  title: "St. Lachland Hotel — Beachfront Luxury, Negombo, Sri Lanka",
   description:
-    "A refined hill-country retreat in Nuwara Eliya. Stay, dine, and plan events with our AI event coordinator.",
-  keywords: "luxury hotel, Sri Lanka, Nuwara Eliya, event venue, wedding venue, hill country resort",
+    "A refined coastal sanctuary in Negombo, Sri Lanka. Stay, dine, and plan events with our AI event coordinator overlooking the golden shores of the Indian Ocean.",
+  keywords: "luxury hotel, Sri Lanka, Negombo, beach resort, event venue, wedding venue, coastal sanctuary",
 };
 
 export const viewport = {

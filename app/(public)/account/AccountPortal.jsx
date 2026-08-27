@@ -263,7 +263,7 @@ export default function AccountPortal({ session, stayBookings, eventBookings, di
               <Bed size={32} className="text-mist mx-auto mb-3" />
               <h3 className="font-serif font-bold text-lg text-emerald mb-1">No Sanctuary Bookings Yet</h3>
               <p className="text-xs text-stone-500 max-w-sm mx-auto mb-6">
-                Experience high-altitude luxury in Nuwara Eliya. Reserve your boutique room or private garden villa.
+                Experience beachfront luxury in Negombo. Reserve your boutique ocean room or private beach villa.
               </p>
               <Link href="/rooms" className="btn btn-solid">
                 Explore Sanctuaries

@@ -5,7 +5,7 @@ import BookingCheckout from "./BookingCheckout";
 
 export const metadata = {
   title: "Sanctuary Reservation Checkout — St. Lachland Hotel",
-  description: "Secure your luxury room or suite reservation at St. Lachland Hotel, Nuwara Eliya.",
+  description: "Secure your luxury room or suite reservation at St. Lachland Hotel, Negombo.",
 };
 
 export default async function RoomBookingPage({ searchParams }) {

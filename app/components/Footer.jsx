@@ -7,14 +7,14 @@ export default function Footer() {
         <div className="footer-grid">
           <div>
             <span className="brand-name">St. Lachland</span>
-            <p className="addr">Grand Estate Road, Nuwara Eliya<br />Central Province, Sri Lanka</p>
-            <p className="text-2xs text-stone-400 mt-2">Boutique Luxury Sanctuary &amp; Historic Highland Tea Estate</p>
+            <p className="addr">Porutota Road, Ethukala, Negombo<br />Western Province, Sri Lanka</p>
+            <p className="text-2xs text-stone-400 mt-2">Boutique Luxury Sanctuary &amp; Beachfront Coastal Resort</p>
           </div>
           <div>
             <h5>Sanctuary &amp; Dining</h5>
             <ul>
               <li><Link href="/rooms">Accommodation &amp; Suites</Link></li>
-              <li><Link href="/dining">The Dining Room</Link></li>
+              <li><Link href="/dining">The Ocean Dining Room</Link></li>
               <li><Link href="/dining/menu">A La Carte Menu</Link></li>
               <li><Link href="/dining/reserve">Table Reservations</Link></li>
             </ul>
@@ -31,7 +31,7 @@ export default function Footer() {
           <div>
             <h5>Contact &amp; Reservations</h5>
             <ul>
-              <li><a href="tel:+94520000000">+94 52 000 0000</a></li>
+              <li><a href="tel:+94312220000">+94 31 222 0000</a></li>
               <li><a href="mailto:stay@stlachland.lk">stay@stlachland.lk</a></li>
               <li><a href="mailto:dining@stlachland.lk">dining@stlachland.lk</a></li>
               <li><a href="mailto:events@stlachland.lk">events@stlachland.lk</a></li>
@@ -40,7 +40,7 @@ export default function Footer() {
         </div>
         <div className="footer-base">
           <span>© {new Date().getFullYear()} St. Lachland Hotel. All rights reserved.</span>
-          <span>Nuwara Eliya · Central Highlands · Sri Lanka</span>
+          <span>Negombo · Golden Coast · Sri Lanka</span>
         </div>
       </div>
     </footer>

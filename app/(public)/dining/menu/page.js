@@ -5,7 +5,7 @@ import { ArrowLeft, Utensils } from "lucide-react";
 
 export const metadata = {
   title: "Restaurant Menu — St. Lachland Hotel",
-  description: "Browse our complete hill-country a la carte dining menu, Ceylon tea pairings, and chef signature dishes.",
+  description: "Browse our complete coastal a la carte dining menu, Negombo lagoon seafood specialties, and chef signature creations.",
 };
 
 export default async function MenuPage() {
@@ -21,8 +21,8 @@ export default async function MenuPage() {
               <ArrowLeft size={14} />
               <span>Back to Dining Overview</span>
             </Link>
-            <h1 className="display text-3xl md:text-4xl text-emerald">The Estate Dining Menu</h1>
-            <p className="text-sm text-mist">Crafted daily using fresh plantation harvest and artisanal Ceylon spices.</p>
+            <h1 className="display text-3xl md:text-4xl text-emerald">The Coastal Dining Menu</h1>
+            <p className="text-sm text-mist">Crafted daily using fresh lagoon seafood, coastal catches, and artisanal Ceylon spices.</p>
           </div>
 
           <Link href="/dining/reserve" className="btn btn-gold btn-sm">

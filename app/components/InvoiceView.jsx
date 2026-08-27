@@ -150,8 +150,8 @@ export default function InvoiceView({ invoice, onClose }) {
 
           {/* Footer Notes */}
           <div className="border-t border-stone-200 pt-6 text-center text-3xs text-stone-400">
-            <p>Thank you for choosing St. Lachland Hotel, Nuwara Eliya. We hope you enjoy your stay.</p>
-            <p className="mt-1">Registered Hotel Entity · VAT Reg: SL-94002-E · Central Province Tourism Council</p>
+            <p>Thank you for choosing St. Lachland Hotel, Negombo. We hope you enjoy your stay.</p>
+            <p className="mt-1">Registered Hotel Entity · VAT Reg: SL-94002-E · Sri Lanka Tourism Development Authority</p>
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import HeroSearch from "../components/HeroSearch.jsx";
 import VenueCarousel from "../components/VenueCarousel.jsx";
 import TestimonialCarousel from "../components/TestimonialCarousel.jsx";
 import CountUp from "../components/CountUp.jsx";
+import NegomboEnvironmentSection from "../components/NegomboEnvironmentSection.jsx";
 import { 
   Waves, Sparkles, Utensils, Martini, Wifi, Car,
   Diamond, Users, Cake, Wine,
@@ -25,7 +26,7 @@ const POPULAR_VENUES = [
   {
     name: "Crystal Ballroom",
     img: "/images/venue-ballroom.jpg",
-    caption: "St. Lachland Estate",
+    caption: "St. Lachland Resort",
     capacity: "51–150 guests",
     price: "60,000",
     badge: "Bestseller",
@@ -34,7 +35,7 @@ const POPULAR_VENUES = [
   {
     name: "Garden Terrace",
     img: "/images/venue-garden.jpg",
-    caption: "St. Lachland Estate",
+    caption: "St. Lachland Resort",
     capacity: "10–50 guests",
     price: "25,000",
     badge: "Popular",
@@ -43,7 +44,7 @@ const POPULAR_VENUES = [
   {
     name: "Grand Hall",
     img: "/images/venue-grand-hall.jpg",
-    caption: "St. Lachland Estate",
+    caption: "St. Lachland Resort",
     capacity: "151–300 guests",
     price: "120,000",
     badge: "Luxury",
@@ -52,7 +53,7 @@ const POPULAR_VENUES = [
   {
     name: "The Conservatory",
     img: "/images/venue-dining.jpg",
-    caption: "St. Lachland Estate",
+    caption: "St. Lachland Resort",
     capacity: "Private dining",
     price: "48,000",
     badge: "Exclusive",
@@ -61,7 +62,7 @@ const POPULAR_VENUES = [
   {
     name: "The Spa Pavilion",
     img: "/images/venue-spa.jpg",
-    caption: "St. Lachland Estate",
+    caption: "St. Lachland Resort",
     capacity: "Couples & groups",
     price: "35,000",
     badge: "Popular",
@@ -88,7 +89,7 @@ const EVENT_TYPES = [
   {
     icon: Users,
     name: "Conferences",
-    desc: "Professional setups with AV, catering and hill-country calm.",
+    desc: "Professional setups with AV, catering and serene coastal ocean breeze.",
     img: "/images/venue-grand-hall.jpg",
   },
   {
@@ -183,16 +184,44 @@ const TESTIMONIALS = [
   {
     name: "Dilshan Perera",
     event: "Gala Dinner · 2024",
-    text: "The fine dining experience was unparalleled. The hill-country setting added a magical touch to our corporate gala.",
+    text: "The fine dining experience was unparalleled. The coastal beachfront setting added a magical touch to our corporate gala.",
     avatar: "DP",
   },
 ];
 
 const STATS = [
-  { value: 500, suffix: "+", label: "Events hosted", icon: PartyPopper },
-  { value: 42, suffix: "", label: "Luxury rooms", icon: BedDouble },
-  { value: 98, suffix: "%", label: "Happy clients", icon: Smile },
-  { value: 5, suffix: "", label: "Award-winning venues", icon: Trophy },
+  {
+    rank: "rank 01/",
+    value: 500,
+    unit: "(+)",
+    label: "events hosted",
+    meta: "/events hosted across 5-star beachfront venues",
+    theme: "step-dark",
+  },
+  {
+    rank: "rank 02/",
+    value: 98,
+    unit: "(%)",
+    label: "satisfaction rate",
+    meta: "/client satisfaction & verified 5-star reviews",
+    theme: "step-mid",
+  },
+  {
+    rank: "rank 03/",
+    value: 42,
+    unit: "(suites)",
+    label: "luxury sanctuaries",
+    meta: "/boutique ocean rooms & private beach villas",
+    theme: "step-light",
+  },
+  {
+    rank: "rank 04/",
+    value: 5,
+    unit: "(venues)",
+    label: "signature venues",
+    meta: "/award-winning banquet halls & ocean terraces",
+    theme: "step-gold",
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -207,7 +236,7 @@ export default function Home() {
         <div className="hero-bg">
           <Image
             src="/images/hero-bg.jpg"
-            alt="St. Lachland Hotel overlooking tea gardens"
+            alt="St. Lachland Hotel overlooking golden Negombo beach"
             fill
             priority
             fetchPriority="high"
@@ -230,7 +259,7 @@ export default function Home() {
             <Reveal>
               <span className="hero-badge">
                 <span className="hero-badge-dot" />
-                Hill-Country Luxury · Sri Lanka
+                Beachfront Luxury · Negombo, Sri Lanka
               </span>
             </Reveal>
             <Reveal delay={120}>
@@ -243,7 +272,7 @@ export default function Home() {
             </Reveal>
             <Reveal delay={240}>
               <p className="hero-subtitle">
-                A colonial-era estate reborn as a celebration destination — let
+                A refined coastal sanctuary on the golden shores of Negombo — let
                 our AI coordinator plan your perfect event with the ideal venue,
                 menu, and décor, all within your budget.
               </p>
@@ -298,30 +327,63 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ========== STATS BANNER ========== */}
-      <section className="stats-banner">
+      {/* ========== STATS BANNER — Cascading Stepped Editorial Metric Blocks ========== */}
+      <section className="stats-banner" id="milestones">
+        {/* Optimized background pattern image with subtle blur */}
+        <div className="stats-bg-container" aria-hidden="true">
+          <Image
+            src="/images/pattern1.jpeg"
+            alt="St. Lachland Wave Pattern Texture"
+            fill
+            sizes="100vw"
+            quality={75}
+            priority={false}
+            className="stats-bg-img"
+          />
+          <div className="stats-bg-overlay" />
+        </div>
+
         <div className="wrap">
-          <span className="stats-eyebrow">St. Lachland by the numbers</span>
-          <div className="stats-grid">
-            {STATS.map((s) => {
-              const IconComp = s.icon;
-              return (
-                <div key={s.label} className="stat-item">
-                  <div className="stat-icon-wrap">
-                    <IconComp size={22} strokeWidth={1.5} />
+          <Reveal>
+            <div className="stats-header">
+              <h2 className="stats-main-title">
+                st. lachland resort<br />
+                by the numbers
+              </h2>
+              <p className="stats-meta-note">
+                based on verified guest &amp; event data<br />
+                as of 2026.
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="stepped-stats-container">
+            {STATS.map((s, i) => (
+              <Reveal key={s.rank} delay={i * 90} className={`stepped-stat-wrapper ${s.theme}`}>
+                <div className="stepped-stat-card">
+                  <div className="stat-card-top">
+                    <span className="stat-card-unit">{s.unit}</span>
                   </div>
-                  <span className="stat-number">
-                    <CountUp end={s.value} suffix={s.suffix} />
-                  </span>
-                  <div className="stat-divider" />
-                  <span className="stat-name">{s.label}</span>
+
+                  <div className="stat-card-main">
+                    <span className="stat-huge-number">
+                      <CountUp end={s.value} />
+                    </span>
+                  </div>
+
+                  <div className="stat-card-bottom">
+                    <span className="stat-card-rank">{s.rank}</span>
+                    <span className="stat-card-meta">{s.meta}</span>
+                  </div>
                 </div>
-              );
-            })}
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
 
+      {/* ========== NEGOMBO LOCATION & ENVIRONMENT SECTION (3D Bento & Telemetry) ========== */}
+      <NegomboEnvironmentSection />
 
       {/* ========== POPULAR VENUES — inspired by Luxury Resort / Travel Booking ========== */}
       <section className="section venues-section" id="venues">
@@ -435,8 +497,8 @@ export default function Home() {
                   <Link href="/events" className="btn btn-gold">
                     Plan an event
                   </Link>
-                  <a href="tel:+94520000000" className="assist-phone">
-                    +94 52 000 0000
+                  <a href="tel:+94312220000" className="assist-phone">
+                    +94 31 222 0000
                   </a>
                 </div>
               </div>
@@ -490,7 +552,7 @@ export default function Home() {
                   Plan your event in a moment, not a month.
                 </h2>
                 <p>
-                  Weddings, conferences, and celebrations on the estate — our
+                  Weddings, conferences, and celebrations by the sea — our
                   coordinator recommends the venue, menu, and décor for your
                   party and budget, and prices it instantly.
                 </p>

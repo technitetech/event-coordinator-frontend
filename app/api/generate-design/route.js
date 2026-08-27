@@ -55,7 +55,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
     }
 
-    const fullPrompt = `${prompt}\n\nSTRICT ARCHITECTURAL DIRECTIVES: Photorealistic 8k interior architectural photography of luxury event venue. No human figures. Elegant Ceylon hill-country luxury decor, natural depth of field, warm architectural illumination.`;
+    const fullPrompt = `${prompt}\n\nSTRICT ARCHITECTURAL DIRECTIVES: Photorealistic 8k interior architectural photography of luxury event venue. No human figures. Elegant Ceylon beachfront coastal luxury decor, natural depth of field, warm architectural illumination.`;
 
     const angles = [
       `Wide panoramic architectural angle of ${venueName} showcasing the spatial floorplan and full lighting atmosphere`,
@@ -86,7 +86,7 @@ export async function POST(req) {
     ];
     const fallback = angles.map((a) => ({
       url: pollinationsUrl(
-        "Luxury Ceylon hill-country hotel event hall interior, photorealistic 8k",
+        "Luxury Ceylon beachfront resort hotel event hall interior, photorealistic 8k",
         a
       ),
     }));

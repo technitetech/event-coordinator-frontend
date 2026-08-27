@@ -82,7 +82,7 @@ export default async function RoomDetailPage({ params }) {
           {/* Main Info (Left 2 cols) */}
           <div className="lg:col-span-2 space-y-10">
             <div>
-              <span className="eyebrow">Estate Sanctuary</span>
+              <span className="eyebrow">Beachfront Sanctuary</span>
               <h1 className="display text-3xl md:text-4xl text-emerald mb-3">{room.name}</h1>
               {room.tagline && <p className="text-lg text-mist italic font-serif">{room.tagline}</p>}
             </div>
@@ -101,7 +101,7 @@ export default async function RoomDetailPage({ params }) {
               )}
               <div className="flex items-center gap-2 text-stone-700">
                 <Award size={18} className="text-gold" />
-                <span>Estate Pekoe Inclusions</span>
+                <span>Coastal Tea &amp; Sunset Inclusions</span>
               </div>
             </div>
 
