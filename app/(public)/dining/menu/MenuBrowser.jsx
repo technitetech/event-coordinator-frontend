@@ -82,7 +82,10 @@ export default function MenuBrowser({ categories }) {
                 checked={filterVegOnly}
                 onChange={(e) => setFilterVegOnly(e.target.checked)}
               />
-              <span>🌱 Vegetarian Only</span>
+              <span className="inline-flex items-center gap-1">
+                <span className="material-symbols-outlined text-emerald text-sm leading-none">eco</span>
+                <span>Vegetarian Only</span>
+              </span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer">
@@ -91,7 +94,10 @@ export default function MenuBrowser({ categories }) {
                 checked={filterSignatureOnly}
                 onChange={(e) => setFilterSignatureOnly(e.target.checked)}
               />
-              <span>✨ Signature Dishes</span>
+              <span className="inline-flex items-center gap-1">
+                <span className="material-symbols-outlined text-gold text-sm leading-none">stars</span>
+                <span>Signature Dishes</span>
+              </span>
             </label>
           </div>
         </div>

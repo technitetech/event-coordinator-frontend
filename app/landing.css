@@ -60,21 +60,21 @@
    GLOBAL UX FIXES (Pro Max skill: priority 1-4)
    ============================================== */
 
-/* ✅ Focus-visible ring on ALL interactive elements (WCAG 2.4.7) */
+/* Focus-visible ring on ALL interactive elements (WCAG 2.4.7) */
 :focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
-/* ✅ cursor:pointer on every clickable thing */
+/* cursor:pointer on every clickable thing */
 a, button, [role="button"], select, label[for], .venue-card,
 .event-type-card, .stat-item, .trust-item, .testimonial-card,
 .amenity-item, .process-item, .assist-feat {
   cursor: pointer;
 }
 
-/* ✅ Reduced-motion: kill hero zoom & float particles */
+/* Reduced-motion: kill hero zoom & float particles */
 @media (prefers-reduced-motion: reduce) {
   .hero-bg img { animation: none !important; }
   .particle { animation: none !important; opacity: 0; }
@@ -100,7 +100,7 @@ a, button, [role="button"], select, label[for], .venue-card,
   cursor: default;
 }
 
-/* ✅ Fix: select/input now fully visible with proper sizing */
+/* Fix: select/input now fully visible with proper sizing */
 .hero-search-field select,
 .hero-search-field input[type="date"] {
   width: 100%;
@@ -113,7 +113,7 @@ a, button, [role="button"], select, label[for], .venue-card,
   border: none;
   outline: none;
   cursor: pointer;
-  /* ✅ Do NOT use appearance:none — keeps native chevron, values visible */
+  /* Do NOT use appearance:none — keeps native chevron, values visible */
   appearance: auto;
   -webkit-appearance: auto;
 }

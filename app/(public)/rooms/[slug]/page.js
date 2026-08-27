@@ -173,7 +173,10 @@ export default async function RoomDetailPage({ params }) {
             </Link>
 
             <div className="mt-4 text-center">
-              <span className="text-2xs text-stone-400">🔒 Instant confirmation · Secure reservation</span>
+              <span className="inline-flex items-center gap-1 text-2xs text-stone-400">
+                <span className="material-symbols-outlined text-xs leading-none">lock</span>
+                <span>Instant confirmation · Secure reservation</span>
+              </span>
             </div>
           </div>
         </div>

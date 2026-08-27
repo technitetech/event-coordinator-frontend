@@ -265,8 +265,14 @@ export default function NegomboEnvironmentSection() {
                         Direct private boardwalk onto soft golden sands with calm Indian Ocean waters.
                       </p>
                       <div className="flex items-center gap-3 mt-2 text-2xs text-stone-300 font-mono">
-                        <span>☀️ 28°C Water</span>
-                        <span>💨 12 kts Breeze</span>
+                        <span className="inline-flex items-center gap-1">
+                          <span className="material-symbols-outlined text-gold text-xs leading-none">wb_sunny</span>
+                          <span>28°C Water</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <span className="material-symbols-outlined text-gold text-xs leading-none">air</span>
+                          <span>12 kts Breeze</span>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -304,8 +310,14 @@ export default function NegomboEnvironmentSection() {
                         Catamaran sailing through biodiversity trails and artisanal crab fisheries.
                       </p>
                       <div className="flex items-center gap-3 mt-2 text-2xs text-stone-300 font-mono">
-                        <span>🛶 Catamaran Tours</span>
-                        <span>🦅 Bird Haven</span>
+                        <span className="inline-flex items-center gap-1">
+                          <span className="material-symbols-outlined text-gold text-xs leading-none">sailing</span>
+                          <span>Catamaran Tours</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <span className="material-symbols-outlined text-gold text-xs leading-none">nature</span>
+                          <span>Bird Haven</span>
+                        </span>
                       </div>
                     </div>
                   </div>

@@ -87,7 +87,10 @@ export default function FeedbackForm({ bookingId, eventSummary, onSuccess }) {
         <p>Your review directly trains our hybrid AI coordinator to deliver even more accurate recommendations.</p>
         {learnedInfo && (
           <div className="feedback-badge-learned">
-            <span>✨ {learnedInfo}</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-xs">auto_awesome</span>
+              <span>{learnedInfo}</span>
+            </span>
           </div>
         )}
       </div>

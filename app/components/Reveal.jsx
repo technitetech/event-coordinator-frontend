@@ -7,7 +7,7 @@ export default function Reveal({ children, delay = 0, className = "" }) {
   const [shown, setShown] = useState(false);
 
   useEffect(() => {
-    // ✅ Pro Max skill: respect prefers-reduced-motion — show immediately
+    // Pro Max skill: respect prefers-reduced-motion — show immediately
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) {
       setShown(true);

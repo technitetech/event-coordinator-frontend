@@ -480,7 +480,7 @@ export default function EventPlanner({ loggedIn, customerName }) {
                   {reserved ? (
                     <div className="reserve-done">
                       <CheckCircle2 size={32} className="text-emerald mx-auto mb-2" />
-                      <strong>Reservation Requested Successfully 🎉</strong>
+                      <strong>Reservation Requested Successfully</strong>
                       <p>
                         Thank you{customerName ? `, ${customerName.split(" ")[0]}` : ""}. Your booking is pending confirmation. You can review your reservation details and submit feedback anytime.
                       </p>
