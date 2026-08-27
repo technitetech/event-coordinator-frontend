@@ -391,6 +391,9 @@ export default function Home() {
 
       {/* ========== POPULAR VENUES — inspired by Luxury Resort / Travel Booking ========== */}
       <section className="section venues-section" id="venues">
+        {/* Paper Tear Transition Divider from Packages to Venues */}
+        <div className="tear-divider-top" aria-hidden="true" />
+
         {/* Oceanfront Infinity Pool Panoramic Background */}
         <div className="venues-bg-img" aria-hidden="true">
           <Image
