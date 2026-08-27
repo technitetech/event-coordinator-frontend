@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { logout } from "../(public)/auth-actions";
@@ -33,9 +34,15 @@ export default function Nav({ session }) {
   return (
     <nav className={`nav ${scrolled || !isHome ? "scrolled" : ""}`}>
       <div className="wrap nav-inner">
-        <Link href="/" className="brand" aria-label="St. Lachland Hotel — home">
-          <span className="brand-mark">SL</span>
-          <span className="brand-name">St.&nbsp;<span className="thin">Lachland</span></span>
+        <Link href="/" className="brand" aria-label="St. Lachlan Hotel & Suites — Home">
+          <Image
+            src={scrolled || !isHome ? "/images/logo.png" : "/images/logo_white.png"}
+            alt="St. Lachlan Hotel & Suites"
+            width={180}
+            height={58}
+            priority
+            className="nav-brand-logo"
+          />
         </Link>
 
         <div className={`nav-links ${open ? "open" : ""}`}>

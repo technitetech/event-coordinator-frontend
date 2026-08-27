@@ -223,21 +223,24 @@ h3.display { font-size: clamp(1.5rem, 3vw, 2rem); }
   padding: 16px 0;
 }
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-.brand-mark {
-  width: 34px; height: 34px; border-radius: 50%;
-  border: 1px solid var(--gold);
-  display: grid; place-items: center;
-  font-family: var(--font-display); font-size: 1.05rem; font-weight: 600;
-  color: var(--gold);
-  transition: color 0.4s, border-color 0.4s;
+.nav-brand-logo {
+  height: 50px;
+  width: auto;
+  max-width: 190px;
+  object-fit: contain;
+  transition: transform 0.3s var(--ease), filter 0.3s ease;
+  display: block;
 }
-.brand-name {
-  font-family: var(--font-display); font-size: 1.5rem; font-weight: 600;
-  letter-spacing: 0.02em; color: #fff; transition: color 0.4s;
+.brand:hover .nav-brand-logo {
+  transform: scale(1.04);
 }
-.brand-name .thin { font-weight: 400; }
-.nav.scrolled .brand-name { color: var(--emerald); }
-.nav.scrolled .brand-mark { color: var(--brass); border-color: var(--brass); }
+.footer-brand-logo {
+  height: 46px;
+  width: auto;
+  max-width: 170px;
+  object-fit: contain;
+  display: block;
+}
 
 .nav-links { display: flex; align-items: center; gap: 38px; }
 .nav-link {

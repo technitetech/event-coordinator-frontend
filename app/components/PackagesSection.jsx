@@ -275,7 +275,7 @@ export default function PackagesSection() {
             <div>
               <strong className="text-white font-serif text-base block">Ready to book your Day Outing or Event?</strong>
               <span className="text-xs text-stone-400 block mt-0.5">
-                St. Lachlan Hotel &amp; Suites · No. 25, St. Anthony&apos;s Road, Negombo, Sri Lanka
+                St. Lachlan Hotel &amp; Suites · No.25 St.Anthoney&apos;s road, Eththukala, Negombo, Sri Lanka
               </span>
             </div>
 
@@ -285,12 +285,20 @@ export default function PackagesSection() {
                 <span className="material-symbols-outlined text-xs">arrow_forward</span>
               </Link>
               <a 
-                href="tel:+94704381343" 
+                href="tel:+94312275000" 
                 className="btn-pkg-contact"
                 title="Call Reservations Directly"
               >
                 <span className="material-symbols-outlined text-sm text-gold shrink-0">call</span>
-                <span className="font-mono text-xs font-semibold text-white tracking-wide">+94 70 438 1343</span>
+                <span className="font-mono text-xs font-semibold text-white tracking-wide">+94 31 227 5000</span>
+              </a>
+              <a 
+                href="tel:+9433603505454" 
+                className="btn-pkg-contact"
+                title="Direct Hotline"
+              >
+                <span className="material-symbols-outlined text-sm text-gold shrink-0">phone_iphone</span>
+                <span className="font-mono text-xs font-semibold text-white tracking-wide">+94 33 6035 05454</span>
               </a>
             </div>
           </div>

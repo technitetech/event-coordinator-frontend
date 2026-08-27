@@ -560,8 +560,8 @@ export default function Home() {
                   <Link href="/events" className="btn btn-gold">
                     Plan an event
                   </Link>
-                  <a href="tel:+94312220000" className="assist-phone">
-                    +94 31 222 0000
+                  <a href="tel:+94312275000" className="assist-phone">
+                    +94 31 227 5000
                   </a>
                 </div>
               </div>
