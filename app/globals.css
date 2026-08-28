@@ -1813,7 +1813,38 @@ h3.display { font-size: clamp(1.5rem, 3vw, 2rem); }
 }
 
 .chat-trigger-btn {
-  margin-top: 20px;
+  margin-top: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 26px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--gold), var(--brass));
+  color: var(--emerald-2);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 0 0 0 rgba(214, 187, 110, 0.55);
+  animation: chat-btn-pulse 2.6s ease-out infinite;
+  transition: transform 0.2s var(--ease, ease), box-shadow 0.2s ease;
+}
+
+.chat-trigger-btn:hover {
+  transform: translateY(-2px);
+  animation-play-state: paused;
+  box-shadow: 0 8px 24px -6px rgba(214, 187, 110, 0.6);
+}
+
+.chat-trigger-btn svg {
+  color: var(--emerald-2);
+}
+
+@keyframes chat-btn-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(214, 187, 110, 0.55); }
+  70%  { box-shadow: 0 0 0 14px rgba(214, 187, 110, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(214, 187, 110, 0); }
 }
 
 .chat-body {

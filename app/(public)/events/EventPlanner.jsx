@@ -164,7 +164,8 @@ export default function EventPlanner({ loggedIn, customerName }) {
           <p>
             Powered by a 3-layer hybrid architecture combining symbolic rule verification, Pareto multi-objective optimization, and explainable AI.
           </p>
-          <button type="button" className="dg-btn-submit chat-trigger-btn" onClick={() => setShowChat(true)}>
+          <button type="button" className="chat-trigger-btn" onClick={() => setShowChat(true)}>
+            <Sparkles size={18} strokeWidth={2.25} />
             Chat with Coordinator
           </button>
         </div>
