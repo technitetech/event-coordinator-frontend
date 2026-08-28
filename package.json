@@ -9,6 +9,10 @@
     "start": "next start",
     "preview": "next build && next start",
     "create-admin": "node scripts/create-admin.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
     "verify": "node scripts/verify-fixes.mjs && node scripts/verify-concurrency.mjs",
     "train:ml": "node scripts/generate-training-data.mjs && bash scripts/train-ml.sh"
   },
@@ -23,8 +27,10 @@
     "sharp": "^0.35.3"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.11",
     "autoprefixer": "^10.5.4",
     "postcss": "^8.5.26",
-    "tailwindcss": "^3.4.19"
+    "tailwindcss": "^3.4.19",
+    "vitest": "^4.1.11"
   }
 }
