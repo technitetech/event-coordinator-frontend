@@ -1121,24 +1121,36 @@ a, button, [role="button"], select, label[for], .venue-card,
 .event-types-section {
   position: relative;
   background-color: #fbf9f2;
-  padding-top: clamp(60px, 7vw, 90px);
-  padding-bottom: clamp(100px, 14vw, 180px);
+  padding-top: clamp(80px, 9vw, 120px);
+  padding-bottom: clamp(100px, 12vw, 160px);
   overflow: hidden;
 }
 
 .event-types-bg-img {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 1;
   overflow: hidden;
   pointer-events: none;
 }
 
+.event-types-bg-img .event-types-bg-full,
 .event-types-bg-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center bottom;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: fill !important;
+  object-position: center center;
+  display: block;
+}
+
+.event-types-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center 20%, rgba(251, 249, 242, 0.45) 0%, rgba(251, 249, 242, 0.15) 60%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .event-types-shell-accent {

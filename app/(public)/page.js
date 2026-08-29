@@ -438,10 +438,11 @@ export default function Home() {
             alt="St. Lachlan Ocean Background"
             fill
             sizes="100vw"
-            quality={90}
+            quality={95}
             priority={false}
-            className="object-cover"
+            className="event-types-bg-full"
           />
+          <div className="event-types-bg-overlay" />
         </div>
 
         {/* Coastal Seashells Garland Background Accent */}
