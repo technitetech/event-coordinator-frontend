@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { bookRoom } from "../actions";
+import { bookRoom, checkRoomAvailability } from "../actions";
 import { Calendar, Users, CheckCircle2, Shield, ArrowRight, ArrowLeft } from "lucide-react";
 
 export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialCheckIn, initialCheckOut, session }) {
@@ -28,23 +28,62 @@ export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialC
   const [error, setError] = useState(null);
   const [confirmedBooking, setConfirmedBooking] = useState(null);
 
+  // Real-time availability check
+  const [roomAvailCount, setRoomAvailCount] = useState(null);
+  const [checkingAvail, setCheckingAvail] = useState(false);
+
+  useEffect(() => {
+    if (!checkIn || !checkOut) { setRoomAvailCount(null); return; }
+    const ci = new Date(checkIn);
+    const co = new Date(checkOut);
+    ci.setHours(0, 0, 0, 0);
+    co.setHours(0, 0, 0, 0);
+    if (co <= ci) { setRoomAvailCount(null); return; }
+
+    let active = true;
+    setCheckingAvail(true);
+    setRoomAvailCount(null);
+    checkRoomAvailability(checkIn, checkOut).then((avail) => {
+      if (!active) return;
+      const slug = roomTypes.find((r) => r.id === Number(selectedRoomId))?.slug;
+      setRoomAvailCount(slug ? (avail[slug]?.available ?? null) : null);
+      setCheckingAvail(false);
+    }).catch(() => { if (active) setCheckingAvail(false); });
+    return () => { active = false; };
+  }, [checkIn, checkOut, selectedRoomId, roomTypes]);
+
   const selectedRoom = roomTypes.find((r) => r.id === Number(selectedRoomId)) || roomTypes[0];
 
-  // Calculate nights
+  // Calculate nights (no Math.max — invalid range deliberately shows 0)
   const checkInDate = new Date(checkIn);
   const checkOutDate = new Date(checkOut);
-  const nights = Math.max(1, Math.round((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)));
+  const nights = Math.round((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+  const validDates = nights >= 1;
 
   const ratePerNight = selectedRoom?.base_rate_per_night || 0;
-  const subtotal = ratePerNight * nights;
-  const taxGov = Math.round(subtotal * 0.05);
-  const serviceCharge = Math.round(subtotal * 0.10);
+  const subtotal = validDates ? ratePerNight * nights : 0;
+  const taxGov = validDates ? Math.round(subtotal * 0.05) : 0;
+  const serviceCharge = validDates ? Math.round(subtotal * 0.10) : 0;
   const totalAmount = subtotal + taxGov + serviceCharge;
+
+  // Min checkout = day after check-in
+  const minCheckOutDate = (() => {
+    const d = new Date(checkIn);
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split("T")[0];
+  })();
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const MAX_ADVANCE_DAYS = 730;
   const MAX_NIGHTS = 30;
+
+  // Adults capped by room occupancy; clamp current value if room changed to a smaller type
+  const maxAdultsForRoom = selectedRoom?.max_occupancy || 6;
+  const clampedAdults = Math.min(guestsAdult, maxAdultsForRoom);
+  const clampedChildren = Math.min(guestsChild, Math.max(0, maxAdultsForRoom - clampedAdults));
+  const adultOptions = Array.from({ length: maxAdultsForRoom }, (_, i) => i + 1);
+  const childOptions = Array.from({ length: Math.max(1, maxAdultsForRoom - clampedAdults + 1) }, (_, i) => i);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -91,8 +130,8 @@ export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialC
         roomTypeId: selectedRoomId,
         checkIn,
         checkOut,
-        guestsAdult,
-        guestsChild,
+        guestsAdult: clampedAdults,
+        guestsChild: clampedChildren,
         specialRequests,
       });
 
@@ -136,7 +175,7 @@ export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialC
           </div>
           <div className="flex justify-between">
             <span className="text-mist">Party Size:</span>
-            <span className="font-semibold">{guestsAdult} Adults{guestsChild > 0 ? `, ${guestsChild} Children` : ""}</span>
+            <span className="font-semibold">{clampedAdults} Adults{clampedChildren > 0 ? `, ${clampedChildren} Children` : ""}</span>
           </div>
           <div className="flex justify-between border-t border-line pt-3">
             <span className="font-bold text-emerald">Total Investment:</span>
@@ -212,7 +251,7 @@ export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialC
                 id="check_out"
                 type="date"
                 value={checkOut}
-                min={checkIn}
+                min={minCheckOutDate}
                 onChange={(e) => setCheckOut(e.target.value)}
                 required
               />
@@ -228,10 +267,10 @@ export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialC
               </label>
               <select
                 id="adults"
-                value={guestsAdult}
-                onChange={(e) => setGuestsAdult(Number(e.target.value))}
+                value={clampedAdults}
+                onChange={(e) => { setGuestsAdult(Number(e.target.value)); setGuestsChild(0); }}
               >
-                {[1, 2, 3, 4, 5, 6].map((n) => (
+                {adultOptions.map((n) => (
                   <option key={n} value={n}>
                     {n} Adult{n > 1 ? "s" : ""}
                   </option>
@@ -243,12 +282,12 @@ export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialC
               <label htmlFor="children">Children (Under 12)</label>
               <select
                 id="children"
-                value={guestsChild}
+                value={clampedChildren}
                 onChange={(e) => setGuestsChild(Number(e.target.value))}
               >
-                {[0, 1, 2, 3].map((n) => (
+                {childOptions.map((n) => (
                   <option key={n} value={n}>
-                    {n} Children
+                    {n} {n === 1 ? "Child" : "Children"}
                   </option>
                 ))}
               </select>
@@ -273,11 +312,29 @@ export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialC
             />
           </div>
 
+          {/* Availability indicator */}
+          {validDates && (
+            <div className={`p-3 rounded-lg border text-xs font-medium flex items-center gap-2 ${
+              checkingAvail
+                ? "bg-stone-50 border-line text-stone-400"
+                : roomAvailCount === 0
+                  ? "bg-red-50 border-red-200 text-red-700"
+                  : roomAvailCount > 0
+                    ? "bg-emerald/5 border-emerald/20 text-emerald"
+                    : "bg-stone-50 border-line text-stone-400"
+            }`}>
+              {checkingAvail && "Checking room availability…"}
+              {!checkingAvail && roomAvailCount === 0 && "No rooms of this type are available for the selected dates. Please choose different dates."}
+              {!checkingAvail && roomAvailCount > 0 && `${roomAvailCount} room${roomAvailCount > 1 ? "s" : ""} available for your selected dates.`}
+              {!checkingAvail && roomAvailCount === null && "Select dates to check availability."}
+            </div>
+          )}
+
           {/* Submit */}
           <button
             type="submit"
             className="btn btn-solid w-full justify-center py-3 text-base"
-            disabled={submitting}
+            disabled={submitting || roomAvailCount === 0}
           >
             {submitting ? "Confirming Sanctuary Reservation..." : session ? "Confirm & Reserve Stay" : "Sign In to Complete Reservation"}
           </button>
@@ -293,7 +350,7 @@ export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialC
         <div className="space-y-3 text-sm">
           <div className="flex justify-between">
             <span className="text-mist">{selectedRoom?.name}</span>
-            <span className="font-semibold">{nights} night{nights > 1 ? "s" : ""}</span>
+            <span className="font-semibold">{validDates ? `${nights} night${nights > 1 ? "s" : ""}` : "—"}</span>
           </div>
 
           <div className="flex justify-between">
@@ -303,22 +360,22 @@ export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialC
 
           <div className="flex justify-between border-t border-dashed border-line pt-3">
             <span className="text-stone-700 font-medium">Room Subtotal</span>
-            <span className="font-semibold">LKR {subtotal.toLocaleString()}</span>
+            <span className="font-semibold">{validDates ? `LKR ${subtotal.toLocaleString()}` : "—"}</span>
           </div>
 
           <div className="flex justify-between text-xs text-stone-500">
             <span>Govt. Tourism Levy (5%)</span>
-            <span>LKR {taxGov.toLocaleString()}</span>
+            <span>{validDates ? `LKR ${taxGov.toLocaleString()}` : "—"}</span>
           </div>
 
           <div className="flex justify-between text-xs text-stone-500">
             <span>Service Charge (10%)</span>
-            <span>LKR {serviceCharge.toLocaleString()}</span>
+            <span>{validDates ? `LKR ${serviceCharge.toLocaleString()}` : "—"}</span>
           </div>
 
           <div className="flex justify-between border-t border-line pt-4 text-base font-bold text-emerald">
             <span>Estimated Total</span>
-            <span className="font-serif text-xl">LKR {totalAmount.toLocaleString()}</span>
+            <span className="font-serif text-xl">{validDates ? `LKR ${totalAmount.toLocaleString()}` : "—"}</span>
           </div>
         </div>
 

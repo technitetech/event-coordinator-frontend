@@ -2,7 +2,7 @@
 
 import { Sparkles, Flame, Leaf } from "lucide-react";
 
-export default function MenuItemCard({ item, onAdd, count = 0 }) {
+export default function MenuItemCard({ item, onAdd, onRemove, count = 0 }) {
   return (
     <article className="menu-item-card bg-white border border-line rounded-xl p-5 shadow-xs hover:border-emerald transition-all flex flex-col justify-between">
       <div>
@@ -15,21 +15,21 @@ export default function MenuItemCard({ item, onAdd, count = 0 }) {
           </span>
         </div>
 
-        {/* Badges / Dietary Icons */}
+        {/* Badges */}
         <div className="flex flex-wrap gap-2 mb-3">
-          {item.is_signature === 1 && (
+          {!!item.is_signature && (
             <span className="inline-flex items-center gap-1 text-2xs font-bold px-2 py-0.5 bg-gold/15 text-stone-900 rounded">
               <Sparkles size={11} className="text-gold" />
               Signature
             </span>
           )}
-          {item.is_vegetarian === 1 && (
+          {!!item.is_vegetarian && (
             <span className="inline-flex items-center gap-1 text-2xs font-bold px-2 py-0.5 bg-emerald/10 text-emerald rounded">
               <Leaf size={11} />
               Vegetarian
             </span>
           )}
-          {item.is_spicy === 1 && (
+          {!!item.is_spicy && (
             <span className="inline-flex items-center gap-1 text-2xs font-bold px-2 py-0.5 bg-red-100 text-red-700 rounded">
               <Flame size={11} />
               Ceylon Spiced
@@ -43,18 +43,39 @@ export default function MenuItemCard({ item, onAdd, count = 0 }) {
       </div>
 
       {onAdd && (
-        <div className="pt-3 border-t border-dashed border-line flex justify-between items-center">
-          <span className="text-2xs text-mist">
-            {count > 0 ? `${count} selected` : "Add to pre-order"}
-          </span>
-          <button
-            type="button"
-            onClick={() => onAdd(item)}
-            className={`btn btn-sm ${count > 0 ? "btn-solid" : "btn-ghost"}`}
-            style={{ fontSize: "0.75rem", padding: "4px 12px" }}
-          >
-            {count > 0 ? `+ Add More (${count})` : "+ Add"}
-          </button>
+        <div className="pt-3 border-t border-dashed border-line">
+          {count === 0 ? (
+            <button
+              type="button"
+              onClick={() => onAdd(item)}
+              className="btn btn-ghost btn-sm w-full justify-center"
+            >
+              + Add to Pre-Order
+            </button>
+          ) : (
+            <div className="flex items-center justify-between">
+              <span className="text-2xs text-emerald font-semibold">{count} in basket</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onRemove && onRemove(item.id)}
+                  className="w-7 h-7 flex items-center justify-center border border-line rounded-lg hover:bg-red-50 hover:border-red-200 text-stone-600 hover:text-red-600 font-bold text-base transition-colors"
+                  aria-label="Remove one"
+                >
+                  −
+                </button>
+                <span className="w-5 text-center font-bold text-emerald text-sm">{count}</span>
+                <button
+                  type="button"
+                  onClick={() => onAdd(item)}
+                  className="w-7 h-7 flex items-center justify-center border border-emerald rounded-lg bg-emerald/5 hover:bg-emerald text-emerald hover:text-white font-bold text-base transition-colors"
+                  aria-label="Add one more"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </article>

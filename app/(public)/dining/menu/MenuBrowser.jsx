@@ -1,24 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import MenuItemCard from "../../../components/MenuItemCard";
-import { Search, Filter, Utensils, ShoppingBag, ArrowRight } from "lucide-react";
+import { Search, Utensils, ShoppingBag, ArrowRight, Trash2 } from "lucide-react";
 
 export default function MenuBrowser({ categories }) {
+  const router = useRouter();
+
   const [selectedCat, setSelectedCat] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterVegOnly, setFilterVegOnly] = useState(false);
   const [filterSignatureOnly, setFilterSignatureOnly] = useState(false);
 
-  // Cart / Pre-order items
   const [cart, setCart] = useState({}); // { itemId: { item, count } }
 
   const handleAddItem = (item) => {
     setCart((prev) => {
       const existing = prev[item.id];
-      const count = existing ? existing.count + 1 : 1;
-      return { ...prev, [item.id]: { item, count } };
+      return { ...prev, [item.id]: { item, count: existing ? existing.count + 1 : 1 } };
     });
   };
 
@@ -35,9 +36,26 @@ export default function MenuBrowser({ categories }) {
     });
   };
 
+  const handleClearCart = () => setCart({});
+
   const cartItems = Object.values(cart);
-  const cartTotal = cartItems.reduce((sum, entry) => sum + entry.item.price * entry.count, 0);
-  const cartItemCount = cartItems.reduce((sum, entry) => sum + entry.count, 0);
+  const cartTotal = cartItems.reduce((sum, { item, count }) => sum + Number(item.price) * count, 0);
+  const cartItemCount = cartItems.reduce((sum, { count }) => sum + count, 0);
+
+  const handleProceedToReserve = () => {
+    // Persist cart across the navigation boundary via localStorage.
+    // ReservationForm reads this on mount, calls placeOrder after booking.
+    const payload = cartItems.map(({ item, count }) => ({
+      menu_item_id: item.id,
+      name: item.name,
+      price: Number(item.price),
+      quantity: count,
+    }));
+    try {
+      localStorage.setItem("dining_preorder_cart", JSON.stringify(payload));
+    } catch {}
+    router.push("/dining/reserve");
+  };
 
   // Filter items
   const allItems = categories.flatMap((c) =>
@@ -48,21 +66,19 @@ export default function MenuBrowser({ categories }) {
     if (selectedCat !== "all" && item.category_slug !== selectedCat) return false;
     if (filterVegOnly && !item.is_vegetarian) return false;
     if (filterSignatureOnly && !item.is_signature) return false;
-    if (searchTerm.trim() !== "") {
+    if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
-      const matchName = item.name.toLowerCase().includes(term);
-      const matchDesc = item.description?.toLowerCase().includes(term);
-      if (!matchName && !matchDesc) return false;
+      if (!item.name.toLowerCase().includes(term) && !item.description?.toLowerCase().includes(term)) return false;
     }
     return true;
   });
 
   return (
     <div className="menu-browser-container">
-      {/* Top Filter Bar */}
+      {/* Filter Bar */}
       <div className="bg-white border border-line rounded-xl p-6 mb-10 shadow-xs">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-6">
-          {/* Search Input */}
+          {/* Search */}
           <div className="relative w-full md:w-80">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-mist" />
             <input
@@ -74,9 +90,9 @@ export default function MenuBrowser({ categories }) {
             />
           </div>
 
-          {/* Quick Dietary Checkboxes */}
+          {/* Dietary Filters */}
           <div className="flex flex-wrap gap-4 text-xs font-semibold text-stone-700">
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={filterVegOnly}
@@ -84,11 +100,10 @@ export default function MenuBrowser({ categories }) {
               />
               <span className="inline-flex items-center gap-1">
                 <span className="material-symbols-outlined text-emerald text-sm leading-none">eco</span>
-                <span>Vegetarian Only</span>
+                Vegetarian Only
               </span>
             </label>
-
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={filterSignatureOnly}
@@ -96,7 +111,7 @@ export default function MenuBrowser({ categories }) {
               />
               <span className="inline-flex items-center gap-1">
                 <span className="material-symbols-outlined text-gold text-sm leading-none">stars</span>
-                <span>Signature Dishes</span>
+                Signature Dishes
               </span>
             </label>
           </div>
@@ -106,7 +121,7 @@ export default function MenuBrowser({ categories }) {
         <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-none">
           <button
             type="button"
-            className={`btn btn-sm ${selectedCat === "all" ? "btn-solid" : "btn-ghost"}`}
+            className={`btn btn-sm whitespace-nowrap ${selectedCat === "all" ? "btn-solid" : "btn-ghost"}`}
             onClick={() => setSelectedCat("all")}
           >
             All Courses ({allItems.length})
@@ -124,13 +139,14 @@ export default function MenuBrowser({ categories }) {
         </div>
       </div>
 
-      {/* Main Grid + Floating Pre-Order Basket */}
+      {/* Item Grid + Basket Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-        {/* Dishes Grid (3 cols or 4 cols) */}
+        {/* Dishes Grid */}
         <div className={cartItemCount > 0 ? "lg:col-span-3" : "lg:col-span-4"}>
           {filteredItems.length === 0 ? (
             <div className="text-center py-16 bg-white border border-line rounded-xl">
-              <p className="text-stone-500 text-sm">No dishes match your selected filter or search term.</p>
+              <Utensils size={32} className="mx-auto text-stone-300 mb-3" />
+              <p className="text-stone-500 text-sm">No dishes match your filters.</p>
               <button
                 type="button"
                 className="btn btn-ghost btn-sm mt-4"
@@ -151,6 +167,7 @@ export default function MenuBrowser({ categories }) {
                   key={item.id}
                   item={item}
                   onAdd={handleAddItem}
+                  onRemove={handleRemoveItem}
                   count={cart[item.id]?.count || 0}
                 />
               ))}
@@ -158,34 +175,55 @@ export default function MenuBrowser({ categories }) {
           )}
         </div>
 
-        {/* Sticky Pre-Order Basket (1 col) */}
+        {/* Sticky Pre-Order Basket */}
         {cartItemCount > 0 && (
           <aside className="sticky top-28 bg-white border border-emerald rounded-xl p-5 shadow-md">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-line">
-              <ShoppingBag size={18} className="text-emerald" />
-              <h3 className="font-serif font-bold text-lg text-emerald">Pre-Order Basket</h3>
+            {/* Basket header */}
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-line">
+              <div className="flex items-center gap-2">
+                <ShoppingBag size={18} className="text-emerald" />
+                <h3 className="font-serif font-bold text-lg text-emerald">Pre-Order</h3>
+                <span className="bg-emerald text-white text-2xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartItemCount}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleClearCart}
+                className="text-2xs text-mist hover:text-red-500 flex items-center gap-1 transition-colors"
+                title="Clear basket"
+              >
+                <Trash2 size={12} />
+                Clear
+              </button>
             </div>
 
-            <div className="space-y-3 max-h-72 overflow-y-auto pr-1 text-xs">
+            {/* Line items */}
+            <div className="space-y-3 max-h-64 overflow-y-auto pr-1 text-xs">
               {cartItems.map(({ item, count }) => (
                 <div key={item.id} className="flex justify-between items-center gap-2 border-b border-stone-100 pb-2">
-                  <div className="truncate">
+                  <div className="min-w-0 flex-1">
                     <span className="font-semibold block truncate">{item.name}</span>
-                    <span className="text-mist">LKR {Number(item.price).toLocaleString()} × {count}</span>
+                    <span className="text-mist">
+                      LKR {Number(item.price).toLocaleString()} × {count}
+                      <span className="ml-1 text-stone-600 font-medium">
+                        = LKR {(Number(item.price) * count).toLocaleString()}
+                      </span>
+                    </span>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(item.id)}
-                      className="w-5 h-5 flex items-center justify-center border border-line rounded hover:bg-stone-100"
+                      className="w-6 h-6 flex items-center justify-center border border-line rounded hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors font-bold"
                     >
-                      -
+                      −
                     </button>
                     <span className="w-4 text-center font-bold">{count}</span>
                     <button
                       type="button"
                       onClick={() => handleAddItem(item)}
-                      className="w-5 h-5 flex items-center justify-center border border-line rounded hover:bg-stone-100"
+                      className="w-6 h-6 flex items-center justify-center border border-emerald rounded bg-emerald/5 hover:bg-emerald hover:text-white transition-colors text-emerald font-bold"
                     >
                       +
                     </button>
@@ -194,22 +232,32 @@ export default function MenuBrowser({ categories }) {
               ))}
             </div>
 
-            <div className="border-t border-line pt-3 mt-4 space-y-2 text-xs">
+            {/* Total */}
+            <div className="border-t border-line pt-3 mt-3 space-y-1 text-xs">
               <div className="flex justify-between font-bold text-sm text-emerald">
-                <span>Total Pre-Order</span>
+                <span>Pre-Order Subtotal</span>
                 <span>LKR {cartTotal.toLocaleString()}</span>
               </div>
-              <p className="text-2xs text-stone-500">
-                Pre-ordering attaches your dish choices to your table reservation for expedited kitchen preparation.
+              <p className="text-2xs text-stone-400">
+                Tax & service charge applied at checkout.
               </p>
             </div>
 
-            <Link
-              href={`/dining/reserve?preOrderTotal=${cartTotal}&itemCount=${cartItemCount}`}
+            {/* CTA */}
+            <button
+              type="button"
+              onClick={handleProceedToReserve}
               className="btn btn-solid w-full justify-center mt-4 text-xs py-2.5"
             >
-              <span>Proceed to Table Reservation</span>
+              Reserve Table & Attach Pre-Order
               <ArrowRight size={14} />
+            </button>
+
+            <Link
+              href="/dining/reserve"
+              className="block text-center text-2xs text-mist hover:text-emerald mt-2 transition-colors"
+            >
+              Reserve a table only (without pre-order)
             </Link>
           </aside>
         )}

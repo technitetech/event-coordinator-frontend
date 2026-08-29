@@ -65,7 +65,7 @@ export default async function RoomsPage({ searchParams }) {
                 name="checkOut"
                 type="date"
                 defaultValue={checkOut}
-                min={checkIn || new Date().toISOString().split("T")[0]}
+                min={checkIn ? (() => { const d = new Date(checkIn); d.setDate(d.getDate() + 1); return d.toISOString().split("T")[0]; })() : new Date().toISOString().split("T")[0]}
                 required
               />
             </div>
