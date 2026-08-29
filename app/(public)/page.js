@@ -431,6 +431,19 @@ export default function Home() {
 
       {/* ========== EVENT TYPES — inspired by Eloraharbor / Norvyn ========== */}
       <section className="section event-types-section" id="events-section">
+        {/* Ocean Waves Background */}
+        <div className="event-types-bg-img" aria-hidden="true">
+          <Image
+            src="/images/ocean.jpeg"
+            alt="St. Lachlan Ocean Background"
+            fill
+            sizes="100vw"
+            quality={90}
+            priority={false}
+            className="object-cover"
+          />
+        </div>
+
         {/* Coastal Seashells Garland Background Accent */}
         <div className="event-types-shell-accent" aria-hidden="true">
           <Image

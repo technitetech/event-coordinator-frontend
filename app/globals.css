@@ -825,7 +825,7 @@ h3.display { font-size: clamp(1.5rem, 3vw, 2rem); }
    EVENT TYPES GRID
    ===================================================== */
 .event-types-section {
-  background: var(--ivory);
+  position: relative;
 }
 .event-type-grid {
   display: grid;
