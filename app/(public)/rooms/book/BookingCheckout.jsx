@@ -41,6 +41,11 @@ export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialC
   const serviceCharge = Math.round(subtotal * 0.10);
   const totalAmount = subtotal + taxGov + serviceCharge;
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const MAX_ADVANCE_DAYS = 730;
+  const MAX_NIGHTS = 30;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!session) {
@@ -48,8 +53,38 @@ export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialC
       return;
     }
 
-    setSubmitting(true);
     setError(null);
+
+    // Client-side date validation (supplements HTML min attribute which can be bypassed)
+    const ciDate = new Date(checkIn);
+    const coDate = new Date(checkOut);
+    ciDate.setHours(0, 0, 0, 0);
+    coDate.setHours(0, 0, 0, 0);
+
+    if (ciDate < today) {
+      setError("Check-in date cannot be in the past.");
+      return;
+    }
+    const daysAhead = Math.round((ciDate - today) / 86400000);
+    if (daysAhead > MAX_ADVANCE_DAYS) {
+      setError("Check-in date cannot be more than 2 years in advance.");
+      return;
+    }
+    if (coDate <= ciDate) {
+      setError("Check-out must be at least one night after check-in.");
+      return;
+    }
+    const stayNights = Math.round((coDate - ciDate) / 86400000);
+    if (stayNights > MAX_NIGHTS) {
+      setError(`Stays are limited to ${MAX_NIGHTS} nights. Please contact us for extended arrangements.`);
+      return;
+    }
+    if (specialRequests.length > 1000) {
+      setError("Special requests must not exceed 1000 characters.");
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
       const res = await bookRoom({
@@ -222,12 +257,18 @@ export default function BookingCheckout({ roomTypes, initialRoomTypeId, initialC
 
           {/* Special Requests */}
           <div className="field">
-            <label htmlFor="requests">Special Preferences &amp; Arrival Notes (Optional)</label>
+            <label htmlFor="requests">
+              Special Preferences &amp; Arrival Notes (Optional)
+              <span className="hint" style={{ float: "right", fontSize: "0.75em" }}>
+                {specialRequests.length}/1000
+              </span>
+            </label>
             <textarea
               id="requests"
               rows={3}
               value={specialRequests}
-              onChange={(e) => setSpecialRequests(e.target.value)}
+              onChange={(e) => setSpecialRequests(e.target.value.slice(0, 1000))}
+              maxLength={1000}
               placeholder="E.g., Dietary requirements, early check-in request, honeymoon anniversary setup..."
             />
           </div>

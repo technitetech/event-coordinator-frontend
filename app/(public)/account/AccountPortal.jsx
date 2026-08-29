@@ -70,8 +70,17 @@ export default function AccountPortal({ session, stayBookings, eventBookings, di
 
   const handleCancelStaySubmit = async (bookingId) => {
     setCancelError(null);
+    const reason = cancelReason.trim();
+    if (!reason) {
+      setCancelError("Please provide a reason for the cancellation.");
+      return;
+    }
+    if (reason.length > 500) {
+      setCancelError("Cancellation reason must not exceed 500 characters.");
+      return;
+    }
     try {
-      const res = await requestCancellation(bookingId, cancelReason);
+      const res = await requestCancellation(bookingId, reason);
       if (res.ok) {
         setActionSuccess("Your cancellation request has been processed successfully.");
         setCancellingStayId(null);
@@ -331,9 +340,11 @@ export default function AccountPortal({ session, stayBookings, eventBookings, di
                           <div className="flex items-center gap-2">
                             <input
                               type="text"
-                              placeholder="Reason for cancellation..."
+                              placeholder="Reason for cancellation (required)..."
                               value={cancelReason}
-                              onChange={(e) => setCancelReason(e.target.value)}
+                              onChange={(e) => setCancelReason(e.target.value.slice(0, 500))}
+                              maxLength={500}
+                              required
                               className="text-xs p-1.5 border border-line rounded"
                             />
                             <button

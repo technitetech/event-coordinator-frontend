@@ -59,14 +59,79 @@ export default function ResourceManager() {
   const save = async () => {
     setSaving(true); setError(null);
 
-    if (editing.__new) {
-      const req = cfg.fields.find((f) => f.key === "password" && f.newOnly);
-      if (req && !editing.password) {
-        setError("Password is required for a new user.");
+    // ── Client-side validation ────────────────────────────────────────────────
+    for (const f of cfg.fields) {
+      const raw = editing[f.key];
+
+      // Required check (skip password field for edits — blank = keep current)
+      const isRequiredField = f.required || (f.newOnly && editing.__new);
+      if (isRequiredField && (raw === "" || raw == null)) {
+        if (f.type === "password" && !editing.__new) continue; // allow blank on edit
+        setError(`${f.label} is required.`);
+        setSaving(false);
+        return;
+      }
+
+      if (raw === "" || raw == null) continue;
+
+      // Number range checks
+      if ((f.type === "number" || f.numeric) && raw !== "") {
+        const n = Number(raw);
+        if (!Number.isFinite(n)) {
+          setError(`${f.label} must be a valid number.`);
+          setSaving(false);
+          return;
+        }
+        if (f.min !== undefined && n < f.min) {
+          setError(`${f.label} must be at least ${f.min}.`);
+          setSaving(false);
+          return;
+        }
+        if (f.max !== undefined && n > f.max) {
+          setError(`${f.label} must not exceed ${f.max}.`);
+          setSaving(false);
+          return;
+        }
+      }
+
+      // Text / textarea length checks
+      if ((f.type === "text" || f.type === "email" || f.type === "tel" || f.type === "password" || f.type === "textarea") && typeof raw === "string") {
+        if (f.minLength && raw.length < f.minLength) {
+          setError(`${f.label} must be at least ${f.minLength} characters.`);
+          setSaving(false);
+          return;
+        }
+        if (f.maxLength && raw.length > f.maxLength) {
+          setError(`${f.label} must not exceed ${f.maxLength} characters.`);
+          setSaving(false);
+          return;
+        }
+        if (f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) {
+          setError("Please enter a valid email address.");
+          setSaving(false);
+          return;
+        }
+      }
+
+      // Pattern check (e.g. slug, phone)
+      if (f.pattern && typeof raw === "string" && raw) {
+        if (!new RegExp(f.pattern).test(raw)) {
+          setError(`${f.label} has an invalid format.`);
+          setSaving(false);
+          return;
+        }
+      }
+    }
+
+    // Cross-field check: min_capacity must be <= max_capacity for venues
+    if (editing.min_capacity !== undefined && editing.max_capacity !== undefined) {
+      if (Number(editing.min_capacity) > Number(editing.max_capacity)) {
+        setError("Minimum capacity cannot exceed maximum capacity.");
         setSaving(false);
         return;
       }
     }
+    // ─────────────────────────────────────────────────────────────────────────
 
     const payload = {};
     cfg.fields.forEach((f) => {
@@ -160,13 +225,30 @@ export default function ResourceManager() {
                       })}
                     </select>
                   ) : f.type === "textarea" ? (
-                    <textarea rows={3} value={editing[f.key] ?? ""} onChange={(e) => setField(f.key, e.target.value)} />
-                  ) : (
-                    <input
-                      type={f.type === "number" ? "number" : f.type === "date" ? "date" : f.type === "password" ? "password" : "text"}
+                    <textarea
+                      rows={3}
                       value={editing[f.key] ?? ""}
                       onChange={(e) => setField(f.key, e.target.value)}
-                      placeholder={!editing.__new && f.type === "password" ? "Leave blank to keep current password" : ""}
+                      maxLength={f.maxLength}
+                    />
+                  ) : (
+                    <input
+                      type={
+                        f.type === "number"   ? "number"   :
+                        f.type === "date"     ? "date"     :
+                        f.type === "password" ? "password" :
+                        f.type === "email"    ? "email"    :
+                        f.type === "tel"      ? "tel"      :
+                        "text"
+                      }
+                      value={editing[f.key] ?? ""}
+                      onChange={(e) => setField(f.key, e.target.value)}
+                      placeholder={!editing.__new && f.type === "password" ? "Leave blank to keep current password" : (f.placeholder ?? "")}
+                      min={f.min}
+                      max={f.max}
+                      minLength={f.minLength}
+                      maxLength={f.maxLength}
+                      pattern={f.pattern}
                     />
                   )}
                   {f.hint && <span className="ad-field-hint">{f.hint}</span>}

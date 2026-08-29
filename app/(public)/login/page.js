@@ -12,10 +12,18 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false);
   const router = useRouter();
 
-  const submit = async () => {
-    setBusy(true); setError(null);
+  const submit = async (e) => {
+    e?.preventDefault();
+    setError(null);
+    const trimmedEmail = email.trim();
+    const trimmedPass  = password.trim();
+    if (!trimmedEmail || !trimmedPass) {
+      setError("Please enter your email and password.");
+      return;
+    }
+    setBusy(true);
     try {
-      const res = await login({ email, password });
+      const res = await login({ email: trimmedEmail, password: trimmedPass });
       if (!res.ok) { setError(res.error); return; }
       router.push(res.role === "admin" ? "/admin" : "/account");
     } catch (e) {
@@ -32,21 +40,33 @@ export default function LoginPage() {
         <h1 className="display">Welcome back</h1>
         <p>Sign in to manage your bookings.</p>
 
-        <div className="auth-form">
+        <form className="auth-form" onSubmit={submit} noValidate>
           <div className="field">
-            <label>Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus />
+            <label htmlFor="login-email">Email</label>
+            <input
+              id="login-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              maxLength={254}
+              required
+              autoFocus
+              autoComplete="email"
+            />
           </div>
           <div className="field">
-            <label>Password</label>
+            <label htmlFor="login-password">Password</label>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && submit()}
+              maxLength={72}
+              required
+              autoComplete="current-password"
             />
           </div>
-        </div>
+        </form>
 
         {error && <div className="err">{error}</div>}
 

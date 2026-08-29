@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { getSession } from "../../(public)/auth-actions";
+import { checkRateLimit } from "../../../lib/rate-limiter";
 
-const API_KEY =
-  process.env.FREELLM_API_KEY ||
-  "freellmapi-f007dd429b105e24e58cb5946ce52ea5053b90c472821d37";
+// Never fall back to a hardcoded key — if the env var is absent, requests
+// skip the primary API and use the pollinations fallback instead.
+const API_KEY = process.env.FREELLM_API_KEY ?? null;
 const API_URL = "http://127.0.0.1:31415/v1/images/generations";
 const PRIMARY_TIMEOUT_MS = 25000;
+
+const MAX_PROMPT_LEN   = 500;
+const MAX_VENUE_NAME_LEN = 100;
 
 function pollinationsUrl(fullPrompt, angle) {
   const seed = Math.floor(Math.random() * 90000) + 10000;
@@ -15,6 +19,9 @@ function pollinationsUrl(fullPrompt, angle) {
 }
 
 async function requestPrimary(fullPrompt, angle) {
+  // Skip primary if no API key is configured
+  if (!API_KEY) return null;
+
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), PRIMARY_TIMEOUT_MS);
   try {
@@ -50,9 +57,23 @@ export async function POST(req) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { prompt, venueName = "Ballroom" } = await req.json();
+    // Rate-limit: each call fires 4 parallel external image requests
+    const ip = (req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown")
+      .split(",")[0].trim();
+    const rl = checkRateLimit(`design:${session.id}:${ip}`, 10, 60_000); // 10 per min
+    if (!rl.ok) {
+      return NextResponse.json({ error: `Rate limit exceeded. Retry in ${rl.retryAfter}s.` }, { status: 429 });
+    }
+
+    const body = await req.json();
+    const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
+    const venueName = typeof body.venueName === "string" ? body.venueName.trim().slice(0, MAX_VENUE_NAME_LEN) : "Ballroom";
+
     if (!prompt) {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
+    }
+    if (prompt.length > MAX_PROMPT_LEN) {
+      return NextResponse.json({ error: `Prompt must not exceed ${MAX_PROMPT_LEN} characters.` }, { status: 400 });
     }
 
     const fullPrompt = `${prompt}\n\nSTRICT ARCHITECTURAL DIRECTIVES: Photorealistic 8k interior architectural photography of luxury event venue. No human figures. Elegant Ceylon beachfront coastal luxury decor, natural depth of field, warm architectural illumination.`;

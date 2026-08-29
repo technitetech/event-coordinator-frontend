@@ -1,5 +1,11 @@
 // Admin resource metadata: labels, endpoint paths, table column definitions,
 // and form fields for the generic CRUD views.
+//
+// Each field may carry validation hints used by the generic form renderer:
+//   min / max       — for type:"number" inputs (HTML min/max attributes)
+//   minLength / maxLength — for text/password/textarea inputs
+//   pattern         — regexp string for HTML pattern attribute
+//   required        — marks the field mandatory
 
 const EVENT_TYPES = [
   { value: "wedding", label: "Wedding" },
@@ -39,11 +45,11 @@ export const RESOURCES = {
       { key: "created_at", label: "Joined", date: true },
     ],
     fields: [
-      { key: "name", label: "Full name", type: "text", required: true },
-      { key: "email", label: "Email address", type: "email", required: true },
-      { key: "phone", label: "Phone", type: "tel" },
-      { key: "role", label: "Role", type: "select", options: ROLES },
-      { key: "password", label: "Password (min 8 chars)", type: "password", note: "Leave blank when editing to keep current password" },
+      { key: "name",     label: "Full name",      type: "text",     required: true,  maxLength: 100 },
+      { key: "email",    label: "Email address",   type: "email",    required: true,  maxLength: 254 },
+      { key: "phone",    label: "Phone",           type: "tel",                       maxLength: 20, pattern: "^\\+?[\\d\\s\\-]{7,20}$" },
+      { key: "role",     label: "Role",            type: "select",   options: ROLES },
+      { key: "password", label: "Password (min 8 chars)", type: "password", minLength: 8, maxLength: 72, hint: "Leave blank when editing to keep current password" },
     ],
   },
 
@@ -59,9 +65,9 @@ export const RESOURCES = {
       { key: "status", label: "Status" },
     ],
     fields: [
-      { key: "check_in_date", label: "Check In Date", type: "date", required: true },
-      { key: "check_out_date", label: "Check Out Date", type: "date", required: true },
-      { key: "total_amount", label: "Total Amount (LKR)", type: "number", required: true },
+      { key: "check_in_date",  label: "Check In Date",      type: "date",   required: true },
+      { key: "check_out_date", label: "Check Out Date",     type: "date",   required: true },
+      { key: "total_amount",   label: "Total Amount (LKR)", type: "number", required: true, min: 0 },
       { key: "status", label: "Status", type: "select", options: [
         { value: "pending", label: "Pending" },
         { value: "confirmed", label: "Confirmed" },
@@ -84,11 +90,11 @@ export const RESOURCES = {
       { key: "status", label: "Status" },
     ],
     fields: [
-      { key: "customer_name", label: "Customer name", type: "text", required: true },
-      { key: "event_type", label: "Event type", type: "select", options: EVENT_TYPES },
-      { key: "event_date", label: "Event date", type: "date", required: true },
-      { key: "guests", label: "Guest count", type: "number", required: true },
-      { key: "total_cost", label: "Total cost (LKR)", type: "number", required: true },
+      { key: "customer_name", label: "Customer name",    type: "text",   required: true, maxLength: 100 },
+      { key: "event_type",    label: "Event type",       type: "select", options: EVENT_TYPES },
+      { key: "event_date",    label: "Event date",       type: "date",   required: true },
+      { key: "guests",        label: "Guest count",      type: "number", required: true, min: 1, max: 500 },
+      { key: "total_cost",    label: "Total cost (LKR)", type: "number", required: true, min: 0 },
       { key: "status", label: "Status", type: "select", options: [
         { value: "pending", label: "Pending" },
         { value: "confirmed", label: "Confirmed" },
@@ -109,9 +115,12 @@ export const RESOURCES = {
       { key: "status", label: "Status" },
     ],
     fields: [
-      { key: "reservation_date", label: "Reservation Date", type: "date", required: true },
-      { key: "time_slot", label: "Time Slot", type: "text", required: true },
-      { key: "covers", label: "Covers", type: "number", required: true },
+      { key: "reservation_date", label: "Reservation Date", type: "date",   required: true },
+      { key: "time_slot", label: "Time Slot", type: "select", required: true, options: [
+        "12:00","12:30","13:00","13:30","14:00","18:00",
+        "18:30","19:00","19:30","20:00","20:30","21:00",
+      ]},
+      { key: "covers", label: "Covers", type: "number", required: true, min: 1, max: 12 },
       { key: "status", label: "Status", type: "select", options: [
         { value: "pending", label: "Pending" },
         { value: "confirmed", label: "Confirmed" },
@@ -133,12 +142,12 @@ export const RESOURCES = {
       { key: "is_active", label: "Active", map: { 1: "Yes", 0: "No" } },
     ],
     fields: [
-      { key: "name", label: "Room Type Name", type: "text", required: true },
-      { key: "slug", label: "URL Slug", type: "text", required: true },
-      { key: "tagline", label: "Tagline", type: "text" },
-      { key: "max_occupancy", label: "Max Occupancy", type: "number", required: true },
-      { key: "base_rate_per_night", label: "Base Rate (LKR)", type: "number", required: true },
-      { key: "description", label: "Description", type: "textarea" },
+      { key: "name",               label: "Room Type Name", type: "text",   required: true, maxLength: 100 },
+      { key: "slug",               label: "URL Slug",       type: "text",   required: true, maxLength: 100, pattern: "^[a-z0-9\\-]+$" },
+      { key: "tagline",            label: "Tagline",        type: "text",   maxLength: 200 },
+      { key: "max_occupancy",      label: "Max Occupancy",  type: "number", required: true, min: 1, max: 20 },
+      { key: "base_rate_per_night",label: "Base Rate (LKR)",type: "number", required: true, min: 0 },
+      { key: "description",        label: "Description",    type: "textarea", maxLength: 2000 },
     ],
   },
 
@@ -153,12 +162,12 @@ export const RESOURCES = {
       { key: "is_outdoor", label: "Setting", map: { 1: "Outdoor", 0: "Indoor" } },
     ],
     fields: [
-      { key: "name", label: "Venue name", type: "text", required: true },
-      { key: "min_capacity", label: "Min capacity", type: "number", required: true },
-      { key: "max_capacity", label: "Max capacity", type: "number", required: true },
-      { key: "base_cost", label: "Base cost (LKR)", type: "number", required: true },
-      { key: "is_outdoor", label: "Is outdoor venue?", type: "select", options: [{ value: 0, label: "Indoor" }, { value: 1, label: "Outdoor" }] },
-      { key: "description", label: "Description", type: "textarea" },
+      { key: "name",         label: "Venue name",      type: "text",   required: true, maxLength: 100 },
+      { key: "min_capacity", label: "Min capacity",    type: "number", required: true, min: 1, max: 500 },
+      { key: "max_capacity", label: "Max capacity",    type: "number", required: true, min: 1, max: 500 },
+      { key: "base_cost",    label: "Base cost (LKR)", type: "number", required: true, min: 0 },
+      { key: "is_outdoor",   label: "Is outdoor venue?", type: "select", options: [{ value: 0, label: "Indoor" }, { value: 1, label: "Outdoor" }] },
+      { key: "description",  label: "Description",    type: "textarea", maxLength: 2000 },
     ],
   },
 
@@ -173,10 +182,10 @@ export const RESOURCES = {
       { key: "is_vegetarian", label: "Veg", map: { 1: "Yes", 0: "No" } },
     ],
     fields: [
-      { key: "name", label: "Dish Name", type: "text", required: true },
-      { key: "price", label: "Price (LKR)", type: "number", required: true },
-      { key: "category_id", label: "Category ID", type: "number", required: true },
-      { key: "description", label: "Description", type: "textarea" },
+      { key: "name",        label: "Dish Name",    type: "text",   required: true, maxLength: 100 },
+      { key: "price",       label: "Price (LKR)",  type: "number", required: true, min: 0 },
+      { key: "category_id", label: "Category ID",  type: "number", required: true, min: 1 },
+      { key: "description", label: "Description",  type: "textarea", maxLength: 1000 },
       { key: "is_available", label: "Available", type: "select", options: [{ value: 1, label: "Yes" }, { value: 0, label: "No" }] },
     ],
   },
@@ -190,10 +199,10 @@ export const RESOURCES = {
       { key: "price_per_head", label: "Price/head (LKR)", money: true },
     ],
     fields: [
-      { key: "name", label: "Menu name", type: "text", required: true },
-      { key: "event_type", label: "Event type", type: "select", options: EVENT_TYPES },
-      { key: "price_per_head", label: "Price per head (LKR)", type: "number", required: true },
-      { key: "description", label: "Description", type: "textarea" },
+      { key: "name",          label: "Menu name",           type: "text",   required: true, maxLength: 100 },
+      { key: "event_type",    label: "Event type",          type: "select", options: EVENT_TYPES },
+      { key: "price_per_head",label: "Price per head (LKR)",type: "number", required: true, min: 0 },
+      { key: "description",   label: "Description",         type: "textarea", maxLength: 1000 },
     ],
   },
 
@@ -207,10 +216,10 @@ export const RESOURCES = {
       { key: "cost", label: "Cost (LKR)", money: true },
     ],
     fields: [
-      { key: "name", label: "Name", type: "text", required: true },
-      { key: "theme", label: "Theme", type: "select", options: THEMES },
-      { key: "tier", label: "Tier", type: "select", options: TIERS },
-      { key: "cost", label: "Cost (LKR)", type: "number", required: true },
+      { key: "name",  label: "Name",       type: "text",   required: true, maxLength: 100 },
+      { key: "theme", label: "Theme",      type: "select", options: THEMES },
+      { key: "tier",  label: "Tier",       type: "select", options: TIERS },
+      { key: "cost",  label: "Cost (LKR)", type: "number", required: true, min: 0 },
     ],
   },
 
@@ -223,10 +232,10 @@ export const RESOURCES = {
       { key: "add_on_cost", label: "Add-on cost (LKR)", money: true },
     ],
     fields: [
-      { key: "name", label: "Name", type: "text", required: true },
-      { key: "event_type", label: "Event type", type: "select", options: EVENT_TYPES },
-      { key: "add_on_cost", label: "Add-on cost (LKR)", type: "number", required: true },
-      { key: "description", label: "Description", type: "textarea" },
+      { key: "name",        label: "Name",               type: "text",   required: true, maxLength: 100 },
+      { key: "event_type",  label: "Event type",         type: "select", options: EVENT_TYPES },
+      { key: "add_on_cost", label: "Add-on cost (LKR)",  type: "number", required: true, min: 0 },
+      { key: "description", label: "Description",        type: "textarea", maxLength: 1000 },
     ],
   },
 
@@ -243,13 +252,13 @@ export const RESOURCES = {
       { key: "would_rebook", label: "Rebook?", map: { 1: "Yes", 0: "No" } },
     ],
     fields: [
-      { key: "booking_id", label: "Booking ID", type: "number", required: true },
-      { key: "overall_rating", label: "Overall Rating", type: "number", required: true },
-      { key: "venue_rating", label: "Venue Rating", type: "number" },
-      { key: "menu_rating", label: "Menu Rating", type: "number" },
-      { key: "decor_rating", label: "Decor Rating", type: "number" },
-      { key: "value_rating", label: "Value Rating", type: "number" },
-      { key: "comment", label: "Comments", type: "textarea" },
+      { key: "booking_id",     label: "Booking ID",      type: "number", required: true, min: 1 },
+      { key: "overall_rating", label: "Overall Rating (1–5)", type: "number", required: true, min: 1, max: 5 },
+      { key: "venue_rating",   label: "Venue Rating (1–5)",   type: "number", min: 1, max: 5 },
+      { key: "menu_rating",    label: "Menu Rating (1–5)",    type: "number", min: 1, max: 5 },
+      { key: "decor_rating",   label: "Decor Rating (1–5)",   type: "number", min: 1, max: 5 },
+      { key: "value_rating",   label: "Value Rating (1–5)",   type: "number", min: 1, max: 5 },
+      { key: "comment",        label: "Comments",             type: "textarea", maxLength: 2000 },
     ],
   },
 };

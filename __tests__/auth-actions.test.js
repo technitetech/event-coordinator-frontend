@@ -19,6 +19,8 @@ const _cookiesSet = vi.fn();
 const _cookiesDel = vi.fn();
 vi.mock("next/headers", () => ({
   cookies: () => ({ set: _cookiesSet, delete: _cookiesDel, get: vi.fn() }),
+  // auth-actions now calls headers() to read the client IP for rate limiting
+  headers: () => ({ get: vi.fn().mockReturnValue("127.0.0.1") }),
 }));
 
 const mockQuery = vi.fn();
@@ -39,9 +41,12 @@ vi.mock("../lib/session-server.js", () => ({
 
 import { registerCustomer, login, logout } from "../app/(public)/auth-actions.js";
 import bcrypt from "bcryptjs";
+import { _clearBuckets } from "../lib/rate-limiter.js";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Reset in-memory rate-limit counters so each test starts clean.
+  _clearBuckets();
 });
 
 // ─── registerCustomer ─────────────────────────────────────────────────────────

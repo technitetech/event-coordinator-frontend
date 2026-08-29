@@ -19,22 +19,50 @@ import { submitFeedback, getLearningStats } from "../../../lib/feedback-learner"
 import { computeCharges } from "../../../lib/invoice";
 import {
   assertTransition, validateFutureDate, parseIntInRange, sanitiseText,
-  MAX_EVENT_GUESTS,
+  MAX_EVENT_GUESTS, DINING_TIME_SLOTS,
 } from "../../../lib/validation";
+
+const VALID_EVENT_TYPES = ["wedding", "conference", "birthday", "dinner"];
+const VALID_THEMES      = ["floral", "modern", "tropical", "classic"];
 
 // ---- NEW: Hybrid Recommendation Engine ----
 export async function getHybridEstimate(input) {
   const session = await getSession();
+  if (!session) return { error: "Please log in to get a personalised recommendation." };
+
+  // Validate / coerce all fields before they reach the engine
+  const eventType = String(input?.event_type || "").toLowerCase();
+  if (!VALID_EVENT_TYPES.includes(eventType))
+    return { error: `Event type must be one of: ${VALID_EVENT_TYPES.join(", ")}.` };
+
+  const guestCheck = parseIntInRange(input?.guests, { min: 1, max: MAX_EVENT_GUESTS, label: "Guest count" });
+  if (!guestCheck.ok) return { error: guestCheck.error };
+
+  const budget = Number(input?.budget);
+  if (!Number.isFinite(budget) || budget <= 0)
+    return { error: "Budget must be a positive number." };
+
+  const theme = String(input?.theme || "floral").toLowerCase();
+  if (!VALID_THEMES.includes(theme))
+    return { error: `Theme must be one of: ${VALID_THEMES.join(", ")}.` };
+
+  // event_date is optional; validate only when provided
+  let eventDate;
+  if (input?.event_date) {
+    const dateCheck = validateFutureDate(input.event_date, "Event date");
+    if (!dateCheck.ok) return { error: dateCheck.error };
+    eventDate = input.event_date;
+  }
+
   try {
-    const result = await getHybridRecommendations({
-      event_type: input.event_type,
-      guests: Number(input.guests),
-      budget: Number(input.budget),
-      theme: input.theme || "floral",
-      event_date: input.event_date || undefined,
-      user_id: session?.id || null,
+    return await getHybridRecommendations({
+      event_type: eventType,
+      guests: guestCheck.value,
+      budget,
+      theme,
+      event_date: eventDate,
+      user_id: session.id,
     });
-    return result;
   } catch (e) {
     console.error("[getHybridEstimate] Error:", e);
     return { error: `Recommendation engine error: ${e.message}` };
@@ -46,14 +74,32 @@ export async function submitEventFeedback(feedbackData) {
   const session = await getSession();
   if (!session) return { ok: false, message: "Please log in to submit feedback." };
 
+  // Verify the booking belongs to this user before accepting feedback.
+  // feedbackData.booking_id must not be trusted without this ownership check.
+  const bookingId = Number(feedbackData?.booking_id);
+  if (!Number.isInteger(bookingId) || bookingId <= 0)
+    return { ok: false, message: "Invalid booking reference." };
+
+  const pool = getPool();
+  const [ownerRows] = await pool.query(
+    "SELECT id FROM event_bookings WHERE id = ? AND user_id = ? LIMIT 1",
+    [bookingId, session.id]
+  );
+  if (!ownerRows.length)
+    return { ok: false, message: "Booking not found or does not belong to your account." };
+
   return submitFeedback({
     ...feedbackData,
+    booking_id: bookingId,  // use the validated integer, not the raw client value
     user_id: session.id,
   });
 }
 
-// ---- NEW: Learning system analytics ----
+// ---- NEW: Learning system analytics (admin-visible only) ----
 export async function getFeedbackStats() {
+  const session = await getSession();
+  if (!session || session.role !== "admin")
+    return { error: "Unauthorised." };
   return getLearningStats();
 }
 
@@ -321,8 +367,27 @@ export async function getMyBookings() {
 
 // ---- Legacy: Flat rule engine (kept for backward compatibility & A/B testing) ----
 export async function getEstimate({ event_type, guests, budget, theme, event_date }) {
+  // Validate all inputs before touching the DB
+  const et = String(event_type || "").toLowerCase();
+  if (!VALID_EVENT_TYPES.includes(et))
+    return { error: `Event type must be one of: ${VALID_EVENT_TYPES.join(", ")}.` };
+
+  const guestCheck = parseIntInRange(guests, { min: 1, max: MAX_EVENT_GUESTS, label: "Guest count" });
+  if (!guestCheck.ok) return { error: guestCheck.error };
+
+  const budgetNum = Number(budget);
+  if (!Number.isFinite(budgetNum) || budgetNum <= 0)
+    return { error: "Budget must be a positive number." };
+
+  if (event_date) {
+    const dc = validateFutureDate(event_date, "Event date");
+    if (!dc.ok) return { error: dc.error };
+  }
+
   const pool = getPool();
   const result = { warnings: [], suggestions: [] };
+  guests = guestCheck.value;
+  budget = budgetNum;
 
   try {
     const [venues] = await pool.query(

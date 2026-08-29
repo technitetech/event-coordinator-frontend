@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "../../(public)/auth-actions";
 import { chatCompletion } from "../../../lib/freellm";
 import { getHybridRecommendations } from "../../../lib/recommendation-engine";
+import { checkRateLimit } from "../../../lib/rate-limiter";
 
 const REQUIRED_FIELDS = ["event_type", "guests", "budget", "theme"];
 const EVENT_TYPES = ["wedding", "conference", "birthday", "dinner"];
@@ -124,16 +125,56 @@ function templatedReply(recommendation, input) {
   return `Based on your ${input.event_type} for ${input.guests} guests, I'd recommend ${venue.name} with ${decoration.name} for a total of LKR ${Number(total_cost).toLocaleString()}. ${explanation?.summary || ""}`.trim();
 }
 
+/** Strip client-supplied sessionState down to only the fields we use, each coerced to a safe type. */
+function sanitiseSessionState(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out = {};
+  const et = String(raw.event_type || "").toLowerCase();
+  if (EVENT_TYPES.includes(et)) out.event_type = et;
+  const g = Number(raw.guests);
+  if (Number.isInteger(g) && g >= 1 && g <= 500) out.guests = g;
+  const b = Number(raw.budget);
+  if (Number.isFinite(b) && b > 0) out.budget = b;
+  const th = String(raw.theme || "").toLowerCase();
+  if (THEMES.includes(th)) out.theme = th;
+  // event_date: accept only YYYY-MM-DD
+  if (typeof raw.event_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw.event_date)) {
+    out.event_date = raw.event_date;
+  }
+  return out;
+}
+
 export async function POST(req) {
   try {
+    // Rate-limit by IP — each call invokes an LLM, so abuse is expensive.
+    const ip = (req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown")
+      .split(",")[0].trim();
+    const rl = checkRateLimit(`chat:${ip}`, 30, 60_000); // 30 req / min per IP
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: `Rate limit exceeded. Retry in ${rl.retryAfter}s.` },
+        { status: 429 }
+      );
+    }
+
     const session = await getSession();
     const body = await req.json();
-    const messages = Array.isArray(body.messages) ? body.messages : [];
-    let sessionState = body.sessionState && typeof body.sessionState === "object" ? { ...body.sessionState } : {};
 
-    if (!messages.length) {
+    // Guard: messages must be a non-empty array of role/content objects
+    if (!Array.isArray(body.messages) || !body.messages.length) {
       return NextResponse.json({ error: "messages is required" }, { status: 400 });
     }
+    const messages = body.messages
+      .filter((m) => m && typeof m.role === "string" && typeof m.content === "string")
+      .slice(0, 50)  // cap history depth — large payloads inflate LLM cost
+      .map((m) => ({ role: m.role, content: m.content.slice(0, 2000) })); // cap per-message length
+
+    if (!messages.length) {
+      return NextResponse.json({ error: "No valid messages provided" }, { status: 400 });
+    }
+
+    // Sanitise client-supplied session state — only allowlisted values enter the engine
+    let sessionState = sanitiseSessionState(body.sessionState);
 
     const lastUserMessage = [...messages].reverse().find((m) => m.role === "user")?.content || "";
     const pendingField = nextMissingField(sessionState);

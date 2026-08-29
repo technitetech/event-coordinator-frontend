@@ -48,6 +48,8 @@ export default function ReservationForm({ session, initialDate, initialCovers })
     };
   }, [date, covers]);
 
+  const MAX_ADVANCE_DAYS = 730;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!session) {
@@ -55,13 +57,36 @@ export default function ReservationForm({ session, initialDate, initialCovers })
       return;
     }
 
+    setError(null);
+
+    // Client-side date checks (supplements HTML min attribute)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const resDate = new Date(date);
+    resDate.setHours(0, 0, 0, 0);
+    if (resDate < today) {
+      setError("Reservation date cannot be in the past.");
+      return;
+    }
+    if (Math.round((resDate - today) / 86400000) > MAX_ADVANCE_DAYS) {
+      setError("Reservations cannot be made more than 2 years in advance.");
+      return;
+    }
+
     if (!timeSlot) {
       setError("Please select an available dining time slot.");
       return;
     }
+    if (dietary.length > 200) {
+      setError("Dietary requirements must not exceed 200 characters.");
+      return;
+    }
+    if (specialRequests.length > 500) {
+      setError("Special requests must not exceed 500 characters.");
+      return;
+    }
 
     setSubmitting(true);
-    setError(null);
 
     try {
       const res = await makeReservation({
@@ -241,7 +266,8 @@ export default function ReservationForm({ session, initialDate, initialCovers })
                 id="dietary"
                 type="text"
                 value={dietary}
-                onChange={(e) => setDietary(e.target.value)}
+                onChange={(e) => setDietary(e.target.value.slice(0, 200))}
+                maxLength={200}
                 placeholder="E.g., Nut allergy, Gluten-free, Halal, Jain"
               />
             </div>
@@ -249,12 +275,18 @@ export default function ReservationForm({ session, initialDate, initialCovers })
 
           {/* Special Requests */}
           <div className="field">
-            <label htmlFor="special_requests">Special Seating Requests (Optional)</label>
+            <label htmlFor="special_requests">
+              Special Seating Requests (Optional)
+              <span className="hint" style={{ float: "right", fontSize: "0.75em" }}>
+                {specialRequests.length}/500
+              </span>
+            </label>
             <textarea
               id="special_requests"
               rows={2}
               value={specialRequests}
-              onChange={(e) => setSpecialRequests(e.target.value)}
+              onChange={(e) => setSpecialRequests(e.target.value.slice(0, 500))}
+              maxLength={500}
               placeholder="E.g., Window table with plantation view, high chair for infant, birthday dessert candle..."
             />
           </div>
