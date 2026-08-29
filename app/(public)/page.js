@@ -486,19 +486,6 @@ export default function Home() {
             })}
           </div>
         </div>
-
-        {/* Coastal Aerial Beach & Ocean Wave Decorative Bottom Artwork */}
-        <div className="event-types-wave-bottom" aria-hidden="true">
-          <Image
-            src="/images/coastal_aereal_print-_Modern_Beach_202608292259 (1).jpeg"
-            alt="Coastal Aerial Beach & Ocean Waves Pattern"
-            width={1376}
-            height={768}
-            quality={95}
-            priority={false}
-            className="wave-pattern-img"
-          />
-        </div>
       </section>
 
       {/* ========== OUR APPROACH — inspired by Norvyn Events / Eloraharbor ========== */}
