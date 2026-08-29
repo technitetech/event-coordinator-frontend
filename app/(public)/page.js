@@ -487,13 +487,13 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Coastal Ocean Wave Decorative Bottom Artwork */}
+        {/* Coastal Aerial Beach & Ocean Wave Decorative Bottom Artwork */}
         <div className="event-types-wave-bottom" aria-hidden="true">
           <Image
-            src="/images/wave_panorama_hd.png"
-            alt="Coastal Ocean Waves Pattern"
-            width={5256}
-            height={1520}
+            src="/images/coastal_aereal_print-_Modern_Beach_202608292259 (1).jpeg"
+            alt="Coastal Aerial Beach & Ocean Waves Pattern"
+            width={1376}
+            height={768}
             quality={95}
             priority={false}
             className="wave-pattern-img"
