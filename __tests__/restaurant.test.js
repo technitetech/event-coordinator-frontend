@@ -1,8 +1,4 @@
-﻿/**
- * Tests for lib/restaurant.js — DB layer mocked.
- * Covers: menu retrieval, time slot availability, reservation creation,
- * cancellation rules, order placement, and order status transitions.
- */
+﻿
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -56,7 +52,7 @@ beforeEach(() => {
   mockConn.rollback.mockResolvedValue(undefined);
 });
 
-// ─── getMenuWithCategories ────────────────────────────────────────────────────
+// ─── getMenuWithCategories  
 
 describe("getMenuWithCategories", () => {
   it("groups menu items under their categories", async () => {
@@ -83,7 +79,7 @@ describe("getMenuWithCategories", () => {
   });
 });
 
-// ─── getAvailableTimeSlots ────────────────────────────────────────────────────
+// ─── getAvailableTimeSlots  
 
 describe("getAvailableTimeSlots", () => {
   it("returns empty array for invalid date", async () => {
@@ -209,7 +205,7 @@ describe("createDiningReservation", () => {
   });
 });
 
-// ─── cancelDiningReservation ──────────────────────────────────────────────────
+// ─── cancelDiningReservation 
 
 describe("cancelDiningReservation", () => {
   it("returns not-found when reservation missing (null id)", async () => {
@@ -261,7 +257,7 @@ describe("cancelDiningReservation", () => {
   });
 });
 
-// ─── submitDiningOrder ────────────────────────────────────────────────────────
+// ─── submitDiningOrder  ────
 
 describe("submitDiningOrder", () => {
   // The function signature is submitDiningOrder({ reservationId, userId, items })
@@ -339,7 +335,7 @@ describe("submitDiningOrder", () => {
   });
 });
 
-// ─── updateOrderStatus ────────────────────────────────────────────────────────
+// ─── updateOrderStatus  ────
 
 describe("updateOrderStatus", () => {
   // updateOrderStatus(orderId, newStatus) — fetches current status from DB first

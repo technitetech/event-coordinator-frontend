@@ -1,16 +1,6 @@
 "use server";
 
-/**
- * Reservation & Recommendation Server Actions
- *
- * Enhanced with hybrid neuro-symbolic recommendation engine.
- * 
- *   getEstimate(plan)              -> Legacy: flat rule engine (kept for backward compatibility)
- *   getHybridEstimate(plan)        -> NEW: 3-layer hybrid engine with Pareto optimization + XAI
- *   createReservation(plan)        -> Saves a booking (requires logged-in user)
- *   getMyBookings()                -> Current customer's reservations
- *   submitEventFeedback(feedback)  -> NEW: Post-event satisfaction ratings
- */
+
 
 import { getPool } from "../../../lib/db";
 import { getSession } from "../auth-actions";
@@ -148,19 +138,11 @@ export async function getMyPreferenceVector() {
   };
 }
 
-// Column is TEXT (64 KB). Stay well inside it while leaving room for the
-// generated image URLs, which embed the whole prompt and run ~1 KB each.
+
 const MAX_IMAGE_JSON_BYTES = 16000;
 const MAX_SINGLE_URL_CHARS = 2500;
 
-/**
- * Serialises generated concept-image URLs for storage.
- *
- * Critically, this never truncates the JSON string itself: slicing a JSON
- * array mid-string yields a value that JSON.parse() rejects, which made the
- * dashboard fall back to rendering the entire raw blob as one <img src> (a
- * guaranteed 404). Instead we drop whole URLs until the payload fits.
- */
+
 function packImageUrls(plan) {
   let candidates = [];
 

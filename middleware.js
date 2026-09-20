@@ -13,7 +13,7 @@ import { NextResponse } from "next/server";
  * a reverse proxy forwards requests through this middleware.
  */
 
-const SESSION_COOKIE = "hl_session";
+const SESSION_COOKIE = "sl_session";
 
 // Security headers applied to every response
 const SECURITY_HEADERS = {

@@ -1,14 +1,6 @@
 "use server";
 
-/**
- * Authentication — server actions.
- *
- * No password is ever hardcoded in this code. Customers register their own
- * password, which is hashed with bcrypt before it touches the database. The
- * admin account is created once by scripts/create-admin.mjs (see that file)
- * using a password YOU choose at seed time — the app only ever compares
- * against the stored bcrypt hash, never a plaintext value in source or env.
- */
+
 
 import bcrypt from "bcryptjs";
 import { cookies, headers } from "next/headers";
@@ -105,11 +97,7 @@ export async function logout() {
   cookies().delete(SESSION_COOKIE);
 }
 
-// ---- Read the current session (used by layouts/pages to decide what to show) ----
-// Async wrapper around the request-cached getSession so this file's
-// "use server" contract holds (only async functions can be exported from
-// "use server" modules — a bare re-export of a cached function trips
-// Next.js's Server Actions validator).
+
 export async function getSession() {
   return _getCachedSession();
 }

@@ -1,12 +1,8 @@
-﻿/**
- * Tests for lib/rooms.js — DB layer mocked with vi.mock.
- * Covers: availability checking, booking creation, status transitions,
- * cancellation business rules, and admin query helpers.
- */
+﻿
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// ─── Mock getPool before importing rooms.js ──────────────────────────────────
+
 
 const mockQuery = vi.fn();
 const mockConn = {
@@ -43,7 +39,7 @@ import {
   updateStayBookingStatus,
 } from "../lib/rooms.js";
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+//  Helpers 
 
 function dateOffset(n) {
   const d = new Date();
@@ -62,7 +58,7 @@ beforeEach(() => {
   mockConn.rollback.mockResolvedValue(undefined);
 });
 
-// ─── getRoomTypes ─────────────────────────────────────────────────────────────
+//  getRoomTypes 
 
 describe("getRoomTypes", () => {
   it("returns room types with parsed JSON amenities", async () => {
@@ -96,7 +92,7 @@ describe("getRoomTypes", () => {
   });
 });
 
-// ─── getRoomTypeBySlug ────────────────────────────────────────────────────────
+//  getRoomTypeBySlug 
 
 describe("getRoomTypeBySlug", () => {
   it("returns the matching room type", async () => {
@@ -115,7 +111,7 @@ describe("getRoomTypeBySlug", () => {
   });
 });
 
-// ─── findAvailableRoom ────────────────────────────────────────────────────────
+//  findAvailableRoom 
 
 describe("findAvailableRoom", () => {
   it("returns a room ID when available", async () => {
@@ -131,7 +127,7 @@ describe("findAvailableRoom", () => {
   });
 });
 
-// ─── getRoomAvailability ──────────────────────────────────────────────────────
+//  getRoomAvailability 
 
 describe("getRoomAvailability", () => {
   it("returns availability map keyed by slug", async () => {
@@ -164,7 +160,7 @@ describe("getRoomAvailability", () => {
   });
 });
 
-// ─── createStayBooking ────────────────────────────────────────────────────────
+//  createStayBooking 
 
 describe("createStayBooking", () => {
   const validInput = {
@@ -267,7 +263,7 @@ describe("createStayBooking", () => {
   });
 });
 
-// ─── cancelStayBooking ────────────────────────────────────────────────────────
+//  cancelStayBooking 
 
 describe("cancelStayBooking", () => {
   it("returns error when booking not found (null bookingId returns not found)", async () => {
@@ -312,7 +308,7 @@ describe("cancelStayBooking", () => {
   });
 });
 
-// ─── updateStayBookingStatus ──────────────────────────────────────────────────
+//  updateStayBookingStatus 
 
 describe("updateStayBookingStatus", () => {
   // updateStayBookingStatus(bookingId, newStatus, adminId, adminName)

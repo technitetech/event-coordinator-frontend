@@ -7,6 +7,8 @@ import { createReservation, getHybridEstimate } from "./actions";
 import DesignGeneratorPopup from "../../components/DesignGeneratorPopup";
 import ChatAssistantPopup from "../../components/ChatAssistantPopup";
 import ExplanationPanel from "../../components/ExplanationPanel";
+import ConceptProgress from "../../components/ConceptProgress";
+import ConceptGallery from "../../components/ConceptGallery";
 import { Sparkles, Award, TrendingUp, DollarSign, CheckCircle2, AlertCircle } from "lucide-react";
 
 const EVENT_TYPES = [
@@ -30,13 +32,17 @@ const PACKAGE_BADGES = {
   "Best Value": { icon: DollarSign, color: "#2B5E49", bg: "#EDF6F2" },
 };
 
-export default function EventPlanner({ loggedIn, customerName }) {
+export default function EventPlanner({
+  loggedIn, customerName,
+  initialEventType, initialEventDate, initialGuests, initialBudget,
+}) {
+  const validTypes = ["wedding", "conference", "birthday", "dinner", "corporate"];
   const [form, setForm] = useState({
-    event_type: "wedding",
-    guests: 100,
-    budget: 350000,
-    theme: "floral",
-    event_date: "",
+    event_type: (initialEventType && validTypes.includes(initialEventType)) ? initialEventType : "wedding",
+    guests:     initialGuests  ? Math.min(500, Math.max(25, Number(initialGuests)))   : 100,
+    budget:     initialBudget  ? Math.min(1000000, Math.max(50000, Number(initialBudget))) : 350000,
+    theme:      "floral",
+    event_date: initialEventDate || "",
   });
 
   const [recommendations, setRecommendations] = useState([]);
@@ -51,6 +57,8 @@ export default function EventPlanner({ loggedIn, customerName }) {
 
   const [showPopup, setShowPopup] = useState(false);
   const [generatedImages, setGeneratedImages] = useState([]);
+  const [imgGenerating, setImgGenerating] = useState(false);
+  const [imgError, setImgError] = useState(null);
   const [showChat, setShowChat] = useState(false);
 
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
@@ -100,8 +108,29 @@ export default function EventPlanner({ loggedIn, customerName }) {
     setShowPopup(true);
   };
 
-  const handleImagesGenerated = (urls) => {
-    setGeneratedImages(Array.isArray(urls) ? urls : [urls]);
+  // The modal closes the moment the user submits; the 20–40s render is tracked
+  // here so the progress bar renders inline on the page instead of in a dialog.
+  const handleGenerateConcepts = async (payload) => {
+    setImgGenerating(true);
+    setImgError(null);
+    setGeneratedImages([]);
+    try {
+      const res = await fetch("/api/generate-design", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to generate design");
+
+      const urls = Array.isArray(data?.data) ? data.data.map(d => d?.url).filter(Boolean) : [];
+      if (urls.length === 0) throw new Error("No image URLs returned from the render service.");
+      setGeneratedImages(urls);
+    } catch (err) {
+      setImgError(err.message || "Could not generate concept visuals.");
+    } finally {
+      setImgGenerating(false);
+    }
   };
 
   const handleApplyChatPlan = (fields, recommendation) => {
@@ -174,7 +203,7 @@ export default function EventPlanner({ loggedIn, customerName }) {
       {showPopup && (
         <DesignGeneratorPopup
           onClose={() => setShowPopup(false)}
-          onGenerate={handleImagesGenerated}
+          onSubmitAnswers={handleGenerateConcepts}
           eventContext={{
             eventType: form.event_type,
             venueName: currentPlan?.venue?.name || "Crystal Ballroom",
@@ -195,8 +224,11 @@ export default function EventPlanner({ loggedIn, customerName }) {
         <div className="wrap tool-grid">
           {/* Left Form Card */}
           <div className="form-card">
-            <h2>Event Constraints</h2>
-            <form onSubmit={handlePlanSubmit} className="f-grid">
+            <div className="form-card-head">
+              <h2>Event Constraints</h2>
+              <p>Configure your requirements — our AI will find the Pareto-optimal packages.</p>
+            </div>
+            <form onSubmit={handlePlanSubmit} className="f-grid form-card-body">
               <div className="field">
                 <label htmlFor="event_type">Event Type</label>
                 <select id="event_type" value={form.event_type} onChange={update("event_type")}>
@@ -266,22 +298,25 @@ export default function EventPlanner({ loggedIn, customerName }) {
               </div>
             </form>
 
-            {error && <div className="err mt-4">{error}</div>}
-
-            {meta && (
-              <div className="meta-info-box mt-6">
-                <div className="meta-item">
-                  <span className="meta-label">Engine:</span>
-                  <span className="meta-val">{meta.engine_version}</span>
-                </div>
-                <div className="meta-item">
-                  <span className="meta-label">Feasible Combos Evaluated:</span>
-                  <span className="meta-val">{meta.feasible_count}</span>
-                </div>
-                <div className="meta-item">
-                  <span className="meta-label">Computation Latency:</span>
-                  <span className="meta-val">{meta.processing_time_ms}ms</span>
-                </div>
+            {(error || meta) && (
+              <div className="form-card-body" style={{ paddingTop: 0 }}>
+                {error && <div className="err">{error}</div>}
+                {meta && (
+                  <div className="meta-info-box" style={{ marginTop: error ? 12 : 0 }}>
+                    <div className="meta-item">
+                      <span className="meta-label">Engine:</span>
+                      <span className="meta-val">{meta.engine_version}</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="meta-label">Feasible Combos Evaluated:</span>
+                      <span className="meta-val">{meta.feasible_count}</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="meta-label">Computation Latency:</span>
+                      <span className="meta-val">{meta.processing_time_ms}ms</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -376,26 +411,24 @@ export default function EventPlanner({ loggedIn, customerName }) {
                       onClick={handleOpenVisualizer}
                       className="btn btn-sm btn-ghost"
                       style={{ fontSize: "0.8rem", padding: "6px 12px" }}
+                      disabled={imgGenerating}
                     >
                       <Sparkles size={14} className="text-gold" />
-                      {generatedImages.length > 0 ? "Regenerate Perspectives" : "Generate 3D Visuals"}
+                      {imgGenerating ? "Rendering…" : generatedImages.length > 0 ? "Regenerate Perspectives" : "Generate 3D Visuals"}
                     </button>
                   </div>
 
-                  {generatedImages.length > 0 ? (
-                    <div>
-                      <div style={{ display: "flex", overflowX: "auto", gap: "12px", paddingBottom: "10px" }}>
-                        {generatedImages.map((img, i) => (
-                          <img
-                            key={i}
-                            src={img}
-                            alt={`AI Generated Architecture Perspective ${i + 1}`}
-                            style={{ width: "260px", height: "260px", objectFit: "cover", borderRadius: "8px", flexShrink: 0 }}
-                          />
-                        ))}
-                      </div>
-                      <p className="text-xs text-stone-500 mt-2 italic text-center">Synchronized perspective renders (Entrance, Floorplan, Centerpiece, Ceiling)</p>
+                  {imgError && (
+                    <div className="err" style={{ marginBottom: 12 }}>
+                      <AlertCircle size={14} style={{ display: "inline", marginRight: 6 }} />
+                      {imgError}
                     </div>
+                  )}
+
+                  {imgGenerating ? (
+                    <ConceptProgress />
+                  ) : generatedImages.length > 0 ? (
+                    <ConceptGallery images={generatedImages} />
                   ) : (
                     <div className="concept-placeholder" onClick={handleOpenVisualizer}>
                       <Sparkles size={24} className="text-gold mb-2" />

@@ -27,17 +27,7 @@ function stripCodeFences(text) {
   return text.replace(/```json\s*/gi, "").replace(/```/g, "").trim();
 }
 
-/**
- * Regex/keyword fallback used when the LLM extraction call fails (e.g. the
- * FreeLLM gateway isn't reachable from wherever this server is running).
- *
- * `pendingField` is whichever field the assistant had just asked for before
- * this reply (computed from the incoming sessionState) — without it, a bare
- * reply like "150" typed in direct answer to "how many guests?" matches none
- * of the explicit patterns below and gets silently dropped, causing the same
- * question to repeat forever. With it, a short reply that doesn't otherwise
- * match anything is assigned to the field that was actually being asked.
- */
+
 function extractFieldsRuleBased(message, pendingField) {
   const fields = {};
   const lower = message.toLowerCase().trim();

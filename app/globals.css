@@ -1077,35 +1077,89 @@ h3.display { font-size: clamp(1.5rem, 3vw, 2rem); }
 /* =====================================================
    EVENTS / COORDINATOR TOOL PAGE
    ===================================================== */
-.tool-hero { padding: 150px 0 40px; background: linear-gradient(150deg, #0f3b2e, #14261d); color: #fff; position: relative; overflow: hidden; }
+.tool-hero {
+  padding: clamp(100px, 14vw, 160px) 0 clamp(28px, 4vw, 48px);
+  background: linear-gradient(150deg, #0f3b2e, #14261d);
+  color: #fff; position: relative; overflow: hidden;
+}
 .tool-hero::after { content:""; position:absolute; inset:0; background: var(--grain); opacity:0.4; mix-blend-mode:overlay; }
 .tool-hero .wrap { position: relative; z-index: 2; }
 .tool-hero .eyebrow { color: var(--gold); }
-.tool-hero h1 { margin: 18px 0 16px; }
-.tool-hero p { color: rgba(255,255,255,0.8); max-width: 52ch; }
+.tool-hero h1 { margin: 14px 0 12px; font-size: clamp(1.8rem, 4vw, 2.8rem); }
+.tool-hero p { color: rgba(255,255,255,0.8); max-width: 52ch; font-size: clamp(0.9rem, 2vw, 1rem); }
 
-.tool-body { padding: 60px 0 110px; }
-.tool-grid { display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 46px; align-items: start; }
-.form-card { background: var(--ivory); border: 1px solid var(--line); border-radius: 14px; padding: 34px; }
-.form-card h2 { font-family: var(--font-display); font-size: 1.7rem; color: var(--emerald); margin-bottom: 24px; }
-.f-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.field { display: flex; flex-direction: column; gap: 8px; }
-.field.wide { grid-column: 1 / -1; }
-.field label { font-size: 0.8rem; font-weight: 700; color: var(--emerald); letter-spacing: 0.02em; }
-.field label .opt { font-weight: 400; color: var(--mist); }
-.field input, .field select {
-  font: inherit; color: var(--ink); background: #fff; border: 1px solid var(--line);
-  border-radius: 8px; padding: 12px 14px; transition: border-color 0.2s, box-shadow 0.2s;
+.tool-body { padding: clamp(32px, 5vw, 64px) 0 clamp(60px, 8vw, 110px); }
+
+/* ---- Responsive grid ---- */
+.tool-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(20px, 3.5vw, 48px);
+  align-items: start;
 }
-.field input:focus, .field select:focus { outline: none; border-color: var(--forest); box-shadow: 0 0 0 3px rgba(28,82,64,0.12); }
-.form-card .btn { width: 100%; justify-content: center; margin-top: 26px; }
 
-.result-wrap { position: sticky; top: 100px; }
-.empty-state { border: 1px dashed var(--line); border-radius: 14px; padding: 60px 30px; text-align: center; color: var(--mist); }
-.empty-state .frond-deco { width: 90px; margin: 0 auto 20px; opacity: 0.5; color: var(--brass); }
+/* ---- Form card ---- */
+.form-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+}
+.form-card-head {
+  background: var(--emerald);
+  padding: 24px clamp(20px, 4vw, 32px) 22px;
+  color: #fff;
+}
+.form-card-head h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  color: #fff;
+  margin: 0 0 4px;
+}
+.form-card-head p { font-size: 0.82rem; color: rgba(255,255,255,.72); margin: 0; }
+.form-card-body { padding: clamp(20px, 4vw, 32px); }
+
+/* keep legacy .form-card h2 for backward compat */
+.form-card > h2 { font-family: var(--font-display); font-size: 1.7rem; color: var(--emerald); margin: 0 0 24px; padding: clamp(20px,4vw,32px); padding-bottom: 0; }
+
+.f-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field.wide { grid-column: 1 / -1; }
+.field label {
+  font-size: 0.72rem; font-weight: 700; color: var(--emerald);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.field label .opt { font-weight: 400; color: var(--mist); text-transform: none; }
+.field input, .field select {
+  font: inherit; color: var(--ink); background: #fafaf9;
+  border: 1.5px solid #e7e5e4;
+  border-radius: 10px; padding: 12px 14px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none; appearance: none;
+}
+.field input:focus, .field select:focus {
+  outline: none;
+  border-color: var(--emerald);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(26,60,52,.1);
+}
+.form-card-body .btn, .form-card > .btn, .form-card .btn { width: 100%; justify-content: center; }
+
+.result-wrap { position: sticky; top: 90px; }
+.empty-state {
+  border: 1.5px dashed #d6d3d1;
+  border-radius: 20px;
+  padding: clamp(36px, 6vw, 64px) 32px;
+  text-align: center;
+  color: var(--mist);
+  background: #faf9f7;
+}
+.empty-state .frond-deco { width: 80px; margin: 0 auto 18px; opacity: 0.45; color: var(--brass); }
 .empty-state .frond-deco svg { width: 100%; }
+.empty-state p { font-size: 0.92rem; max-width: 36ch; margin: 0 auto; line-height: 1.65; }
 
-.slip { background: var(--ivory); border: 1px solid var(--line); border-radius: 14px; padding: 30px; animation: rise 0.5s var(--ease) both; }
+.slip { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: clamp(20px,4vw,30px); animation: rise 0.5s var(--ease) both; box-shadow: 0 4px 24px rgba(0,0,0,.06); }
 @keyframes rise { from { opacity: 0; transform: translateY(10px);} to { opacity:1; transform:none; } }
 @media (prefers-reduced-motion: reduce) { .slip { animation: none; } }
 .slip-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 22px; }
@@ -1219,6 +1273,19 @@ h3.display { font-size: clamp(1.5rem, 3vw, 2rem); }
   color: var(--ink);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+}
+
+/* ---- Concept render progress ---- */
+@keyframes cp-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes cp-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .5; transform: scale(.88); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [style*="cp-shimmer"], [style*="cp-pulse"] { animation: none !important; }
 }
 
 /* ---- AI Concept Preview Card ---- */
@@ -1438,8 +1505,26 @@ h3.display { font-size: clamp(1.5rem, 3vw, 2rem); }
   font-weight: 600;
 }
 
-@media (max-width: 860px) { .tool-grid { grid-template-columns: 1fr; } .result-wrap { position: static; } .xai-radar-row { grid-template-columns: 1fr; } }
-@media (max-width: 460px) { .f-grid { grid-template-columns: 1fr; } }
+@media (max-width: 860px) {
+  .tool-grid { grid-template-columns: 1fr; }
+  .result-wrap { position: static; }
+  .xai-radar-row { grid-template-columns: 1fr; }
+  .slip { padding: 20px; }
+  .slip-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .slip-total .val { font-size: 1.55rem; }
+}
+@media (max-width: 600px) {
+  .f-grid { grid-template-columns: 1fr; }
+  .li { flex-direction: column; gap: 4px; }
+  .li-cost { font-size: 1rem; }
+  .pareto-tabs-grid { grid-template-columns: 1fr 1fr; }
+  .reserve-actions { flex-direction: column; }
+  .reserve-actions .btn { width: 100%; }
+}
+@media (max-width: 420px) {
+  .pareto-tabs-grid { grid-template-columns: 1fr; }
+  .slip-total { flex-direction: column; gap: 6px; }
+}
 
 
 /* =====================================================================

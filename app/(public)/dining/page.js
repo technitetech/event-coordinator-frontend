@@ -36,7 +36,7 @@ export default async function DiningPage() {
               <Utensils size={16} />
               <span>Reserve a Table</span>
             </Link>
-            <Link href="/dining/menu" className="btn btn-ghost">
+            <Link href="/dining/menu" className="btn btn-light">
               <span>View Full Menu</span>
               <ArrowRight size={16} />
             </Link>

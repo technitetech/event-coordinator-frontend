@@ -8,11 +8,11 @@ import {
   CalendarCheck,
   UtensilsCrossed,
   BarChart3,
-  ScrollText,
-  Sparkles,
   Database,
   LogOut,
-  ExternalLink
+  ExternalLink,
+  ChefHat,
+  BedDouble,
 } from "lucide-react";
 
 export default function AdminSidebar({ name }) {
@@ -51,19 +51,17 @@ export default function AdminSidebar({ name }) {
           <UtensilsCrossed size={16} />
           <span>Kitchen Ticket Board</span>
         </Link>
+        <Link href="/admin/menu" className={linkClass(isActive("/admin/menu"))}>
+          <ChefHat size={16} />
+          <span>Menu Management</span>
+        </Link>
+        <Link href="/admin/rooms" className={linkClass(isActive("/admin/rooms"))}>
+          <BedDouble size={16} />
+          <span>Room Management</span>
+        </Link>
         <Link href="/admin/revenue" className={linkClass(isActive("/admin/revenue"))}>
           <BarChart3 size={16} />
           <span>Revenue Analytics</span>
-        </Link>
-
-        <div className="ad-nav-section-title mt-4">Intelligence &amp; Audits</div>
-        <Link href="/admin/analytics" className={linkClass(isActive("/admin/analytics"))}>
-          <Sparkles size={16} />
-          <span>AI Research Telemetry</span>
-        </Link>
-        <Link href="/admin/audit-log" className={linkClass(isActive("/admin/audit-log"))}>
-          <ScrollText size={16} />
-          <span>System Audit Trail</span>
         </Link>
 
         <div className="ad-nav-section-title mt-4">Master Records</div>

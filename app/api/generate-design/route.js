@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "../../(public)/auth-actions";
 import { checkRateLimit } from "../../../lib/rate-limiter";
+import { ANGLES, buildScenePrompt, buildAnglePrompt } from "../../../lib/design-prompt";
 
 // Never fall back to a hardcoded key — if the env var is absent, requests
 // skip the primary API and use the pollinations fallback instead.
@@ -8,17 +9,31 @@ const API_KEY = process.env.FREELLM_API_KEY ?? null;
 const API_URL = "http://127.0.0.1:31415/v1/images/generations";
 const PRIMARY_TIMEOUT_MS = 25000;
 
-const MAX_PROMPT_LEN   = 500;
-const MAX_VENUE_NAME_LEN = 100;
+// 16:9 suits architectural interiors far better than the previous 1:1 square,
+// which cropped away the width that makes a floorplan shot readable. These
+// dimensions are also a native flux resolution, so nothing is upscaled.
+const IMG_W = 1344;
+const IMG_H = 768;
 
-function pollinationsUrl(fullPrompt, angle) {
-  const seed = Math.floor(Math.random() * 90000) + 10000;
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(
-    `${fullPrompt}. ${angle}`
-  )}?width=1024&height=1024&nologo=true&seed=${seed}`;
+// Optional. Without a registered token Pollinations stamps its own watermark
+// on every render regardless of `nologo` — set POLLINATIONS_TOKEN in
+// .env.local to get clean, unbranded images.
+const POLLINATIONS_TOKEN = process.env.POLLINATIONS_TOKEN ?? null;
+
+function pollinationsUrl(prompt, seed) {
+  const qs = new URLSearchParams({
+    model: "flux",     // markedly higher fidelity than the default turbo model
+    width: String(IMG_W),
+    height: String(IMG_H),
+    seed: String(seed),
+    nologo: "true",
+    enhance: "false",  // keep our hand-tuned prompt verbatim rather than let it be rewritten
+  });
+  if (POLLINATIONS_TOKEN) qs.set("token", POLLINATIONS_TOKEN);
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?${qs}`;
 }
 
-async function requestPrimary(fullPrompt, angle) {
+async function requestPrimary(prompt) {
   // Skip primary if no API key is configured
   if (!API_KEY) return null;
 
@@ -32,10 +47,11 @@ async function requestPrimary(fullPrompt, angle) {
         Authorization: `Bearer ${API_KEY}`,
       },
       body: JSON.stringify({
-        prompt: `${fullPrompt}. ${angle}`,
+        prompt,
         model: "auto",
         n: 1,
-        size: "1024x1024",
+        size: `${IMG_W}x${IMG_H}`,
+        quality: "hd",
       }),
       signal: controller.signal,
     });
@@ -65,33 +81,38 @@ export async function POST(req) {
       return NextResponse.json({ error: `Rate limit exceeded. Retry in ${rl.retryAfter}s.` }, { status: 429 });
     }
 
-    const body = await req.json();
-    const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
-    const venueName = typeof body.venueName === "string" ? body.venueName.trim().slice(0, MAX_VENUE_NAME_LEN) : "Ballroom";
+    const body = await req.json().catch(() => ({}));
 
-    if (!prompt) {
-      return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
-    }
-    if (prompt.length > MAX_PROMPT_LEN) {
-      return NextResponse.json({ error: `Prompt must not exceed ${MAX_PROMPT_LEN} characters.` }, { status: 400 });
-    }
+    // The prompt is composed server-side from allow-listed values, so an
+    // over-long or injected client string can no longer reach the model. This
+    // is what removes the old "Prompt must not exceed 500 characters" failure:
+    // length is now bounded by construction rather than rejected after the fact.
+    const scene = buildScenePrompt({
+      answers:   body?.answers ?? {},
+      venueName: body?.venueName,
+      eventType: body?.eventType,
+      theme:     body?.theme,
+      guests:    body?.guests,
+    });
 
-    const fullPrompt = `${prompt}\n\nSTRICT ARCHITECTURAL DIRECTIVES: Photorealistic 8k interior architectural photography of luxury event venue. No human figures. Elegant Ceylon beachfront coastal luxury decor, natural depth of field, warm architectural illumination.`;
+    // One random base seed per request keeps the four angles visually coherent
+    // as a set, while the prime-spaced offsets keep each perspective distinct.
+    // A fresh base each call means "Regenerate" genuinely produces new concepts.
+    const baseSeed = Math.floor(Math.random() * 1_000_000);
 
-    const angles = [
-      `Wide panoramic architectural angle of ${venueName} showcasing the spatial floorplan and full lighting atmosphere`,
-      `Close-up cinematic focus on the VIP table setting, linen textures, and handcrafted centerpiece arrangement`,
-      `Perspective from the grand entrance corridor gazing toward the illuminated stage backdrop`,
-      `Overhead perspective highlighting the ceiling draping design, chandeliers, and floral installations`,
-    ];
-
-    // Fire all 4 angle requests against the primary API in parallel. Each
-    // one that fails or times out falls back to the pollinations render for
-    // that specific angle, so we always return 4 synchronized perspectives.
+    // Fire all 4 angle requests against the primary API in parallel. Each one
+    // that fails or times out falls back to the pollinations render for that
+    // specific angle, so we always return 4 synchronized perspectives.
     const results = await Promise.all(
-      angles.map(async (angle) => {
-        const primary = await requestPrimary(fullPrompt, angle);
-        return { url: primary || pollinationsUrl(fullPrompt, angle) };
+      ANGLES.map(async (angle, i) => {
+        const prompt = buildAnglePrompt(scene, angle);
+        const seed = (baseSeed + i * 7919) % 1_000_000;
+        const primary = await requestPrimary(prompt);
+        return {
+          url: primary || pollinationsUrl(prompt, seed),
+          key: angle.key,
+          label: angle.label,
+        };
       })
     );
 
@@ -99,17 +120,12 @@ export async function POST(req) {
   } catch (error) {
     console.error("Image generation error:", error);
     // Absolute-last-resort: 4 generic perspectives so the UI still gets a gallery
-    const angles = [
-      "wide panoramic hall view",
-      "close-up centerpiece detail",
-      "entrance corridor perspective",
-      "overhead ceiling installation",
-    ];
-    const fallback = angles.map((a) => ({
-      url: pollinationsUrl(
-        "Luxury Ceylon beachfront resort hotel event hall interior, photorealistic 8k",
-        a
-      ),
+    const scene = buildScenePrompt({});
+    const baseSeed = Math.floor(Math.random() * 1_000_000);
+    const fallback = ANGLES.map((angle, i) => ({
+      url: pollinationsUrl(buildAnglePrompt(scene, angle), (baseSeed + i * 7919) % 1_000_000),
+      key: angle.key,
+      label: angle.label,
     }));
     return NextResponse.json({ data: fallback });
   }

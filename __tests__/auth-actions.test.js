@@ -1,11 +1,6 @@
-/**
- * Tests for app/(public)/auth-actions.js
- * Mocks: DB pool, bcrypt, next/headers cookies, session-server cache.
- */
+
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-
-// ─── Mocks (hoisted by Vitest before all imports) ────────────────────────────
 
 vi.mock("server-only", () => ({}));
 
@@ -49,7 +44,7 @@ beforeEach(() => {
   _clearBuckets();
 });
 
-// ─── registerCustomer ─────────────────────────────────────────────────────────
+//  registerCustomer
 
 describe("registerCustomer", () => {
   it("returns error when required fields are missing", async () => {
@@ -112,7 +107,7 @@ describe("registerCustomer", () => {
   });
 });
 
-// ─── login ────────────────────────────────────────────────────────────────────
+//  login 
 
 describe("login", () => {
   it("returns error when email or password is missing", async () => {
@@ -156,7 +151,7 @@ describe("login", () => {
   });
 });
 
-// ─── logout ───────────────────────────────────────────────────────────────────
+//  logout 
 
 describe("logout", () => {
   it("deletes the session cookie", async () => {

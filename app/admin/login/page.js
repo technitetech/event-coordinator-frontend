@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { login } from "../../(public)/auth-actions";
 import Frond from "../../components/Frond";
 
@@ -10,7 +9,6 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
-  const router = useRouter();
 
   const submit = async (e) => {
     e?.preventDefault();
@@ -29,7 +27,8 @@ export default function AdminLogin() {
         setError("This account doesn't have admin access.");
         return;
       }
-      router.push("/admin");
+      // Hard navigation so the server layout sees the freshly-set session cookie.
+      window.location.href = "/admin";
     } catch (e) {
       setError("Something went wrong. Is the app running correctly?");
     } finally {
