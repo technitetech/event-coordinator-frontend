@@ -1280,12 +1280,11 @@ h3.display { font-size: clamp(1.5rem, 3vw, 2rem); }
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-@keyframes cp-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: .5; transform: scale(.88); }
+@keyframes cp-spin {
+  to { transform: rotate(360deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  [style*="cp-shimmer"], [style*="cp-pulse"] { animation: none !important; }
+  [style*="cp-shimmer"] { animation: none !important; }
 }
 
 /* ---- AI Concept Preview Card ---- */

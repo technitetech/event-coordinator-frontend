@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Frond from "../../components/Frond";
 import { createReservation, getHybridEstimate } from "./actions";
 import DesignGeneratorPopup from "../../components/DesignGeneratorPopup";
 import ChatAssistantPopup from "../../components/ChatAssistantPopup";
 import ExplanationPanel from "../../components/ExplanationPanel";
-import ConceptProgress from "../../components/ConceptProgress";
 import ConceptGallery from "../../components/ConceptGallery";
 import { Sparkles, Award, TrendingUp, DollarSign, CheckCircle2, AlertCircle } from "lucide-react";
 
@@ -59,6 +58,8 @@ export default function EventPlanner({
   const [generatedImages, setGeneratedImages] = useState([]);
   const [imgGenerating, setImgGenerating] = useState(false);
   const [imgError, setImgError] = useState(null);
+  const [conceptSlots, setConceptSlots] = useState([]);
+  const pollRef = useRef(null);
   const [showChat, setShowChat] = useState(false);
 
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
@@ -108,12 +109,14 @@ export default function EventPlanner({
     setShowPopup(true);
   };
 
-  // The modal closes the moment the user submits; the 20–40s render is tracked
-  // here so the progress bar renders inline on the page instead of in a dialog.
+  // The modal closes on submit and the render runs server-side one angle at a
+  // time, so progress is polled here and each perspective lands independently.
   const handleGenerateConcepts = async (payload) => {
     setImgGenerating(true);
     setImgError(null);
     setGeneratedImages([]);
+    setConceptSlots([]);
+
     try {
       const res = await fetch("/api/generate-design", {
         method: "POST",
@@ -121,17 +124,50 @@ export default function EventPlanner({
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to generate design");
+      if (!res.ok) throw new Error(data.error || "Failed to start the render.");
 
-      const urls = Array.isArray(data?.data) ? data.data.map(d => d?.url).filter(Boolean) : [];
-      if (urls.length === 0) throw new Error("No image URLs returned from the render service.");
-      setGeneratedImages(urls);
+      setConceptSlots(data.angles || []);
+      pollConceptJob(data.jobId);
     } catch (err) {
       setImgError(err.message || "Could not generate concept visuals.");
-    } finally {
       setImgGenerating(false);
     }
   };
+
+  const pollConceptJob = (jobId) => {
+    if (pollRef.current) clearInterval(pollRef.current);
+
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/generate-design?jobId=${encodeURIComponent(jobId)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Lost track of the render job.");
+
+        setConceptSlots(data.angles || []);
+        setGeneratedImages((data.angles || []).filter(a => a.url).map(a => a.url));
+
+        if (data.done) {
+          clearInterval(pollRef.current);
+          pollRef.current = null;
+          setImgGenerating(false);
+
+          const failed = (data.angles || []).filter(a => a.status === "error");
+          if (failed.length === data.angles.length) {
+            setImgError(failed[0]?.error || "Every perspective failed to render.");
+          } else if (failed.length > 0) {
+            setImgError(`${failed.length} of ${data.angles.length} perspectives failed — the rest are shown below.`);
+          }
+        }
+      } catch (err) {
+        clearInterval(pollRef.current);
+        pollRef.current = null;
+        setImgGenerating(false);
+        setImgError(err.message);
+      }
+    }, 2000);
+  };
+
+  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
 
   const handleApplyChatPlan = (fields, recommendation) => {
     setForm((f) => ({
@@ -425,10 +461,8 @@ export default function EventPlanner({
                     </div>
                   )}
 
-                  {imgGenerating ? (
-                    <ConceptProgress />
-                  ) : generatedImages.length > 0 ? (
-                    <ConceptGallery images={generatedImages} />
+                  {imgGenerating || conceptSlots.length > 0 ? (
+                    <ConceptGallery slots={conceptSlots} generating={imgGenerating} />
                   ) : (
                     <div className="concept-placeholder" onClick={handleOpenVisualizer}>
                       <Sparkles size={24} className="text-gold mb-2" />

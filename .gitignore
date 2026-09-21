@@ -11,3 +11,7 @@ Thumbs.db
 .idea/
 .venv/
 __pycache__/
+
+# Generated AI concept renders
+public/images/concepts/*
+!public/images/concepts/.gitkeep

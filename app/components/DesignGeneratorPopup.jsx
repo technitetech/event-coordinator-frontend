@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DESIGN_OPTIONS as OPTIONS, MAX_SPECIAL_NOTES } from "../../lib/design-prompt";
+import { DESIGN_OPTIONS as OPTIONS, MAX_SPECIAL_NOTES, ANGLES } from "../../lib/design-prompt";
 
 export default function DesignGeneratorPopup({ onClose, onSubmitAnswers, eventContext = {} }) {
   const {
@@ -36,9 +36,11 @@ export default function DesignGeneratorPopup({ onClose, onSubmitAnswers, eventCo
   // Hand the structured selections to the parent and close straight away — the
   // render takes 20–40s, so the progress belongs on the page behind the modal
   // rather than trapping the user in a frozen dialog.
+  const [count, setCount] = useState(ANGLES.length);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmitAnswers({ answers, venueName, eventType, theme, guests });
+    onSubmitAnswers({ answers, venueName, eventType, theme, guests, count });
     onClose();
   };
 
@@ -95,6 +97,40 @@ export default function DesignGeneratorPopup({ onClose, onSubmitAnswers, eventCo
                 placeholder="E.g., Ceylon tea garden view backdrop, candlelit aisle, gold Chiavari chairs..."
                 rows={2}
               ></textarea>
+            </div>
+
+            <div className="dg-field dg-field-full">
+              <label>Perspectives to render</label>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 8 }}>
+                {ANGLES.map((a, i) => {
+                  const n = i + 1;
+                  const on = count === n;
+                  return (
+                    <button
+                      key={a.key}
+                      type="button"
+                      onClick={() => setCount(n)}
+                      style={{
+                        padding: "9px 10px", borderRadius: 9, cursor: "pointer", textAlign: "left",
+                        border: `1.5px solid ${on ? "var(--emerald, #1A3C34)" : "#e7e5e4"}`,
+                        background: on ? "rgba(26,60,52,.06)" : "#fff",
+                        transition: "all .15s",
+                      }}
+                    >
+                      <span style={{ display: "block", fontSize: 13, fontWeight: 700, color: on ? "var(--emerald, #1A3C34)" : "#1c1917" }}>
+                        {n} {n === 1 ? "view" : "views"}
+                      </span>
+                      <span style={{ display: "block", fontSize: 10.5, color: "#a8a29e", marginTop: 1 }}>
+                        ~{n} min
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <span style={{ fontSize: 11, color: "#a8a29e", marginTop: 6, display: "block" }}>
+                Renders run one at a time to stay within the free render quota — fewer views finish sooner.
+                Rendering: {ANGLES.slice(0, count).map(a => a.label).join(", ")}.
+              </span>
             </div>
           </form>
         </div>
